@@ -1,0 +1,25 @@
+{
+  "name": "cmdo-socket",
+  "version": "1.0.1",
+  "description": "Simple web socket solution written for nodejs.",
+  "repository": "https://github.com/cmdo/toolkit.git",
+  "author": "Christoffer Rødvik <christoffer@kodemon.net>",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "server",
+    "socket"
+  ],
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "build": "yarn clean && yarn compile",
+    "clean": "rm -rf ./dist ./node_modules && rm -rf tsconfig.tsbuildinfo",
+    "compile": "../../node_modules/.bin/tsc -b",
+    "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+  "dependencies": {
+    "ws": "7.4.2"
+  }
+}

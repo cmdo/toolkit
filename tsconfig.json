@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "cmdo-*": ["packages/*/src"]
+    },
+    "strict": true,
+    "composite": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true
+  }
+}

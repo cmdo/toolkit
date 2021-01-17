@@ -1,0 +1,28 @@
+{
+	"name": "cmdo-access",
+	"version": "1.1.0",
+	"description": "Access control service for browser and nodejs.",
+	"author": "Christoffer Rødvik <christoffer@kodemon.net>",
+	"repository": "https://github.com/cmdo/toolkit.git",
+	"license": "MIT",
+	"keywords": [
+		"access-control",
+		"security",
+		"acl"
+	],
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+    "prepublishOnly": "yarn build",
+		"pack": "yarn build && npm pack && tar -xvzf *.tgz && rm -rf package *.tgz",
+    "build": "yarn clean && yarn compile",
+    "clean": "rm -rf ./dist ./node_modules && rm -rf tsconfig.tsbuildinfo",
+    "compile": "../../node_modules/.bin/tsc -b",
+		"test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+	"dependencies": {
+		"cmdo-inverse": "*",
+		"notation": "2.0.0"
+	}
+}

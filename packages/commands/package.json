@@ -1,0 +1,23 @@
+{
+  "name": "cmdo-commands",
+  "version": "1.0.7",
+  "description": "Core package for write side based event service.",
+  "repository": "https://github.com/cmdo/toolkit.git",
+  "author": "Christoffer Rødvik <christoffer@kodemon.net>",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "build": "yarn clean && yarn compile",
+    "clean": "rm -rf ./dist ./node_modules && rm -rf tsconfig.tsbuildinfo",
+    "compile": "../../node_modules/.bin/tsc -b",
+    "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+  "dependencies": {
+    "cmdo-access": "*",
+    "cmdo-http": "*",
+    "cmdo-inverse": "*"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "cmdo-inverse",
+  "version": "1.0.1",
+  "description": "Inversion of control service for browser and nodejs.",
+  "author": "Christoffer Rødvik <christoffer@kodemon.net>",
+  "license": "MIT",
+  "repository": "https://github.com/cmdo/toolkit.git",
+  "keywords": [
+    "inversion-of-control",
+    "dependency-injection",
+    "ioc",
+    "di"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "build": "yarn clean && yarn compile",
+    "clean": "rm -rf ./dist ./node_modules && rm -rf tsconfig.tsbuildinfo",
+    "compile": "../../node_modules/.bin/tsc -b",
+    "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  }
+}

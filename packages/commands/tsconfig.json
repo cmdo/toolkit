@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "references": [{
+    "path": "../access/tsconfig.json"
+  },{
+    "path": "../inverse/tsconfig.json"
+  },{
+    "path": "../http/tsconfig.json"
+  }],
+  "include": ["src/**/*"]
+}

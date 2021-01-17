@@ -1,0 +1,23 @@
+{
+  "name": "cmdo-router",
+  "description": "Framework agnostic routing solution for single page web applications.",
+  "version": "1.2.4",
+  "author": "Christoffer Rodvik <christoffer@kodemon.net>",
+  "license": "MIT",
+  "repository": "https://github.com/cmdo/toolkit.git",
+  "keywords": [
+    "router",
+    "web",
+    "spa"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "build": "yarn clean && yarn compile",
+    "clean": "rm -rf ./dist ./node_modules && rm -rf tsconfig.tsbuildinfo",
+    "compile": "../../node_modules/.bin/tsc -b",
+    "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  }
+}
