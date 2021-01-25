@@ -50,4 +50,4 @@ function remove(grants: AccessGrantsData, acid: string, resource: string, action
   }
 }
 
-container.singleton("AccessStore", new TestAccessStore());
+container.set("AccessStore", new TestAccessStore());

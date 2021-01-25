@@ -25,7 +25,7 @@ export class AccessControl {
    *
    * @returns AccessControl
    */
-  public static async for(id: string, store = container.resolve("AccessStore")): Promise<AccessControl> {
+  public static async for(id: string, store = container.get("AccessStore")): Promise<AccessControl> {
     return new AccessControl(id, await store.getGrants(id));
   }
 

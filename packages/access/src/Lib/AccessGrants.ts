@@ -15,7 +15,7 @@ export class AccessGrants {
    * @param acid   - Access control id to modify grants within.
    * @param grants - Grants being modified.
    */
-  constructor(id: string, acid: string, grants: AccessGrantsData, private store = container.resolve("AccessStore")) {
+  constructor(id: string, acid: string, grants: AccessGrantsData, private store = container.get("AccessStore")) {
     this.id = id;
     this.acid = acid;
     this.grants = grants;
