@@ -1,8 +1,8 @@
 {
   "name": "cmdo-inverse",
-  "version": "1.0.1",
-  "description": "Inversion of control service for browser and nodejs.",
-  "author": "Christoffer Rødvik <christoffer@kodemon.net>",
+  "version": "1.1.0",
+  "description": "Inversion of control dependency injection service.",
+  "author": "Christoffer Rødvik <dev@kodemon.net>",
   "license": "MIT",
   "repository": "https://github.com/cmdo/toolkit.git",
   "keywords": [

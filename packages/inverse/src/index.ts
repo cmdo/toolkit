@@ -1,2 +1,2 @@
-export { Container } from "./Lib/Container";
+export { Container } from "./Container";
 export { Token, Tokens } from "./Types/Token";

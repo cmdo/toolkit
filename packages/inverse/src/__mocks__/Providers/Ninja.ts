@@ -7,7 +7,7 @@ export class Ninja implements Warrior {
   public weapon: Weapon;
 
   constructor(weapon: keyof Weapons) {
-    this.weapon = container.resolve(weapon);
+    this.weapon = container.get(weapon);
   }
 
   public fight() {

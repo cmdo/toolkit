@@ -1,4 +1,4 @@
-import { Token } from "../../../src/Types/Token";
+import { Token } from "../../Types/Token";
 
 type Constructor = {
   new (): Weapon;

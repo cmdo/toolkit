@@ -1,13 +1,13 @@
-import { container } from "./mocks/Container";
-import { Axe } from "./mocks/Providers/Axe";
-import { Katana } from "./mocks/Providers/Katana";
-import { Ninja } from "./mocks/Providers/Ninja";
-import { Viking } from "./mocks/Providers/Viking";
+import { container } from "../__mocks__/Container";
+import { Axe } from "../__mocks__/Providers/Axe";
+import { Katana } from "../__mocks__/Providers/Katana";
+import { Ninja } from "../__mocks__/Providers/Ninja";
+import { Viking } from "../__mocks__/Providers/Viking";
 
-container.register("ninja", Ninja);
-container.register("viking", Viking);
-container.singleton("axe", new Axe());
-container.singleton("katana", new Katana());
+container.set("ninja", Ninja);
+container.set("viking", Viking);
+container.set("axe", new Axe());
+container.set("katana", new Katana());
 
 /*
  |--------------------------------------------------------------------------------
@@ -16,8 +16,8 @@ container.singleton("katana", new Katana());
  */
 
 describe("Container", () => {
-  const ninja = container.resolve("ninja", "katana");
-  const viking = container.resolve("viking", "axe");
+  const ninja = container.get("ninja", "katana");
+  const viking = container.get("viking", "axe");
 
   it("should resolve correct warrior instances", () => {
     expect(ninja).toBeInstanceOf(Ninja);
