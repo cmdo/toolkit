@@ -11,7 +11,7 @@ export class Stream<A extends Aggregate = any> {
    * @param id     - Stream id.
    * @param stream - Event stream service.
    */
-  constructor(public id: string, private stream = container.resolve("Stream")) {
+  constructor(public id: string, private stream = container.get("Stream")) {
     this.get = this.get.bind(this);
     this.state = this.state.bind(this);
     this.apply = this.apply.bind(this);

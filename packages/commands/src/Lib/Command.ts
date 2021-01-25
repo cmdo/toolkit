@@ -17,7 +17,7 @@ export class Command {
    *
    * @param type - Command type to resolve.
    */
-  constructor(private options: Options, public bus = container.resolve("Bus"), public registrar = container.resolve("Registrar")) {}
+  constructor(private options: Options, public bus = container.get("Bus"), public registrar = container.get("Registrar")) {}
 
   /**
    * Genesis state of the command.
