@@ -5,7 +5,7 @@ export { Event } from "./Lib/Event";
 export { events } from "./Lib/Events";
 export type { Policy } from "./Lib/Policy";
 export { Stream } from "./Lib/Stream";
+export * from "./Lib/Timestamp";
 export type { BusService } from "./Services/Bus";
-export type { RegistrarService } from "./Services/Registrar";
 export type { StreamService } from "./Services/Stream";
 export type { Aggregate, Meta } from "./Types";

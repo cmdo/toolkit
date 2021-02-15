@@ -2,7 +2,6 @@ import { AccessControl } from "cmdo-access";
 
 import { Event } from "./Lib/Event";
 import { Policy } from "./Lib/Policy";
-import { RegistrarService } from "./Services/Registrar";
 
 /*
  |--------------------------------------------------------------------------------
@@ -39,11 +38,6 @@ export type Options<State = unknown, Data = unknown> = {
   data?: string[];
 
   /**
-   * List of keys to reserve. Used for system wide unique values such as emails.
-   */
-  reserve?: string[];
-
-  /**
    * List of command policies to execute before allowing access to the processing
    * of the command.
    */
@@ -62,7 +56,6 @@ export type Request<Data = any> = {
 };
 
 export type Actions = {
-  registrar: RegistrarService;
   apply<T extends Event>(event: T): Promise<void>;
 };
 
@@ -78,6 +71,8 @@ export type Context = {
  */
 
 export type Meta = {
+  [key: string]: any;
+
   /**
    * Creator of the event, if this is an impersonated event make sure to add
    * the impersonated entity id here. And the admin id to the impersonator
@@ -86,17 +81,11 @@ export type Meta = {
   auditor: string;
 
   /**
-   * Event impersonator key is used for tracking the administrator creating the
-   * event on behalf of a another entity.
-   */
-  impersonator?: string;
-
-  /**
    * UNIX timestamp of when the event was created. This value is also used for
    * sorting the event stream. Defaults to the time of creation if not manually
    * provided.
    */
-  created?: number;
+  timestamp: string;
 
   /**
    * Check if the event stream is deleted.

@@ -1101,18 +1101,6 @@ cliui@^6.0.0:
     strip-ansi "^6.0.0"
     wrap-ansi "^6.2.0"
 
-"cmdo-access@file:packages/access":
-  version "1.1.0-beta"
-  dependencies:
-    cmdo-inverse "file:../../Library/Caches/Yarn/v6/npm-cmdo-access-1.1.0-beta-37564d89-1a59-4ca8-8047-eb8b58698e02-1610890933243/node_modules/inverse"
-    notation "2.0.0"
-
-"cmdo-http@file:packages/http":
-  version "1.0.0"
-
-"cmdo-inverse@file:packages/inverse":
-  version "1.0.1"
-
 co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
@@ -2920,6 +2908,11 @@ ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+murmurhash@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-2.0.0.tgz#556779daf7c39a0d2a3f5a9d080d84bf4833f9ee"
+  integrity sha512-Uo7ZHw+PLe2Q8/qbPIVYxAaoi+TYGZwu1a8ryeeASRXJLRSaLCblAGfjh02eu4+/9aUJBpkHXZv42AXmzOW2kw==
 
 nanomatch@^1.2.9:
   version "1.2.13"

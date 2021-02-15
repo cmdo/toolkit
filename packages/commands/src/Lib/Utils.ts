@@ -1,4 +1,31 @@
-import { HttpError } from "cmdo-http";
+/*
+ |--------------------------------------------------------------------------------
+ | Errors
+ |--------------------------------------------------------------------------------
+ */
+
+type DataVerificationErrorDetails = {
+  provided: any;
+  required: string[];
+  missing: string[];
+};
+
+class DataVerificationError extends Error {
+  public type = "DataVerificationError" as const;
+
+  public details: DataVerificationErrorDetails;
+
+  constructor(details: any) {
+    super("Required data properties are missing.");
+    this.details = details;
+  }
+}
+
+/*
+ |--------------------------------------------------------------------------------
+ | Verify Data
+ |--------------------------------------------------------------------------------
+ */
 
 /**
  * Checks for missing keys that are required to exist on the data, if the check
@@ -24,7 +51,7 @@ export function verifyData(data: any, keys: string[]): void {
     }
   }
   if (missing.length > 0) {
-    throw new HttpError(400, "Required data properties are missing.", {
+    throw new DataVerificationError({
       provided: data,
       required: keys,
       missing

@@ -9,7 +9,7 @@ import { Context, Request } from "../Types";
 /**
  * Generates a policy accept response.
  *
- * @returns Accept
+ * @returns Accept response.
  */
 export function accept(): Accepted {
   return {
@@ -20,16 +20,14 @@ export function accept(): Accepted {
 /**
  * Generates a policy reject response.
  *
- * @param code    - Http response code.
  * @param message - Message detailing the rejection.
  * @param data    - (Optional) Additional rejection data.
  *
- * @returns Reject
+ * @returns Reject response.
  */
-export function reject(code: number, message: string, data = {}): Rejected {
+export function reject(message: string, data = {}): Rejected {
   return {
     status: "rejected",
-    code,
     message,
     data
   };
@@ -45,7 +43,7 @@ export type Policy = (this: Response, req: Request, ctx: Context) => Promise<Acc
 
 type Response = {
   accept(): Accepted;
-  reject(code: number, message: string, data?: any): Rejected;
+  reject(message: string, data?: any): Rejected;
 };
 
 type Accepted = {
@@ -54,7 +52,6 @@ type Accepted = {
 
 type Rejected = {
   status: "rejected";
-  code: number;
   message: string;
   data: any;
 };

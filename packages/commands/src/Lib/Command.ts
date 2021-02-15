@@ -1,5 +1,4 @@
 import { AccessControl } from "cmdo-access";
-import { HttpError } from "cmdo-http";
 
 import { container } from "../Container";
 import { Context, Options, Request } from "../Types";
@@ -10,14 +9,12 @@ import { verifyData } from "./Utils";
 const DEFAULT_CONTEXT = { auditor: "guest", access: new AccessControl("guest", {}) };
 
 export class Command {
-  private reserved: string[] = [];
-
   /**
    * Create a new Command instance.
    *
    * @param type - Command type to resolve.
    */
-  constructor(private options: Options, public bus = container.get("Bus"), public registrar = container.get("Registrar")) {}
+  constructor(private options: Options, public bus = container.get("Bus")) {}
 
   /**
    * Genesis state of the command.
@@ -45,7 +42,6 @@ export class Command {
       }
 
       await this.policies(req, ctx);
-      await this.reserve(req);
 
       const stream = new Stream(req.stream);
       const state = await stream.state(this.genesis);
@@ -53,14 +49,12 @@ export class Command {
       await handler.call(
         {
           ...state,
-          registrar: this.registrar,
           apply: stream.apply
         },
         req,
         ctx
       );
     } catch (err) {
-      this.release(req);
       throw err;
     } finally {
       this.bus.release(req.stream);
@@ -73,7 +67,7 @@ export class Command {
    * @param req - Command request.
    * @param ctx - Request context.
    */
-  private async policies(req: Request, ctx: Context): Promise<HttpError | void> {
+  private async policies(req: Request, ctx: Context): Promise<void> {
     const { policies = [] } = this.options;
     for (const policy of policies) {
       const response = await policy.call(policyResponse, req, ctx);
@@ -82,40 +76,23 @@ export class Command {
           continue; // policy accepted, check next policy ...
         }
         case "rejected": {
-          return new HttpError(response.code, response.message, response.data);
+          throw new Command.PolicyError(response.message, response.data);
         }
       }
     }
   }
 
   /**
-   * Registrar command reservation.
-   *
-   * @remarks
-   * A command can attempt to reserve incoming key => value pairs as unique entries.
-   *
-   * @param req - Command request.
+   * Creates error for a failed policy operation.
    */
-  private async reserve(req: Request): Promise<void> {
-    const { reserve = [] } = this.options;
-    for (const key of reserve) {
-      const value: string | undefined = (req.data as any)[key];
-      if (!value) {
-        throw new HttpError(400, "Missing required reservation key in data object.", { key });
-      }
-      await this.registrar.register(key, value);
-      this.reserved.push(key);
-    }
-  }
+  private static PolicyError = class extends Error {
+    public type = "PolicyError" as const;
 
-  /**
-   * Release command reservations.
-   *
-   * @param req - Command request.
-   */
-  private release(req: Request) {
-    for (const key of this.reserved) {
-      this.registrar.release(key, req.data[key]);
+    public data: any;
+
+    constructor(message: string, data: any) {
+      super(message);
+      this.data = data;
     }
-  }
+  };
 }

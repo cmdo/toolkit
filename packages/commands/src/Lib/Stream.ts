@@ -1,5 +1,3 @@
-import { HttpError } from "cmdo-http";
-
 import { container } from "../Container";
 import { Aggregate } from "../Types";
 import { Event } from "./Event";
@@ -42,7 +40,7 @@ export class Stream<A extends Aggregate = any> {
 
     if (isGenesis) {
       if (events.length) {
-        throw new HttpError(400, `Stream '${this.id}' already exists.`);
+        throw new Stream.DuplicateError(this.id);
       }
       return { id: this.id } as A;
     }
@@ -51,7 +49,7 @@ export class Stream<A extends Aggregate = any> {
     // Fold the event stream into a single current state object.
 
     if (!events.length) {
-      throw new HttpError(400, `Stream '${this.id}' does not exist.`);
+      throw new Stream.NotFoundError(this.id);
     }
 
     let state: any = { id: this.id };
@@ -69,4 +67,28 @@ export class Stream<A extends Aggregate = any> {
   public async apply<T extends Event>(event: T): Promise<void> {
     await this.stream.add(this.id, event);
   }
+
+  /**
+   * Creates error for genesis stream that already exists.
+   */
+  private static DuplicateError = class extends Error {
+    public type = "DuplicateError" as const;
+
+    constructor(stream: string) {
+      super();
+      this.message = `Stream ${stream} already exists.`;
+    }
+  };
+
+  /**
+   * Creates error for a non genesis stream that could not be resolved.
+   */
+  private static NotFoundError = class extends Error {
+    public type = "NotFoundError" as const;
+
+    constructor(stream: string) {
+      super();
+      this.message = `Stream ${stream} does not exist.`;
+    }
+  };
 }

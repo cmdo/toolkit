@@ -8,8 +8,6 @@
     "path": "../access/tsconfig.json"
   },{
     "path": "../inverse/tsconfig.json"
-  },{
-    "path": "../http/tsconfig.json"
   }],
   "include": ["src/**/*"],
   "exclude": ["src/**/__tests__/**/*", "src/**/__mocks__/**/*"]

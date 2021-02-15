@@ -1,6 +1,6 @@
 {
   "name": "cmdo-commands",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Core package for write side based event service.",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <christoffer@kodemon.net>",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "cmdo-access": "*",
-    "cmdo-http": "*",
-    "cmdo-inverse": "*"
+    "cmdo-inverse": "*",
+    "murmurhash": "^2.0.0"
   }
 }

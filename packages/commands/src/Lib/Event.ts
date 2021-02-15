@@ -1,4 +1,11 @@
 import { Meta } from "../Types";
+import { clock, Timestamp } from "./Timestamp";
+
+type MetaProps = {
+  [key: string]: any;
+  auditor: string;
+  deleted?: false | "deleted" | "destroyed";
+};
 
 export abstract class Event<Aggregate = unknown, Data = unknown> {
   public abstract readonly type: string;
@@ -11,11 +18,12 @@ export abstract class Event<Aggregate = unknown, Data = unknown> {
    *
    * @param attributes - Event data.
    */
-  constructor(data: Data, meta: Meta) {
+  constructor(data: Data, meta: MetaProps) {
     this.data = data;
     this.meta = {
+      ...meta,
       auditor: meta.auditor,
-      created: meta.created || Math.floor(Date.now() / 1000),
+      timestamp: Timestamp.send(clock).toString(),
       deleted: typeof meta.deleted !== "number" ? false : meta.deleted
     };
   }
