@@ -12,6 +12,15 @@ export type StreamService = {
   add(streamId: string, event: Event): Promise<void>;
 
   /**
+   * Add event via re-hydrate operation. This differs from add in that we simply
+   * want to perform a simple event upsert and projection.
+   *
+   * @param streamId - Stream being re-hydrated.
+   * @param event    - Event to re-hydrate.
+   */
+  rehydrate(streamId: string, event: Event): Promise<void>;
+
+  /**
    * Get all events in order of creation for the provided event stream.
    *
    * @param streamId - Stream id.

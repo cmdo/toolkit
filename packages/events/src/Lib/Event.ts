@@ -1,4 +1,5 @@
 import { clock, Timestamp } from "./Timestamp";
+import { uuid } from "./Uuid";
 
 /*
  |--------------------------------------------------------------------------------
@@ -33,6 +34,7 @@ export type Meta<T> = T & {
 export abstract class Event<S = Unknown, D = Unknown, M = Unknown> {
   public abstract readonly type: string;
 
+  public readonly id: string;
   public readonly data: D;
   public readonly meta: Meta<M>;
 
@@ -42,6 +44,7 @@ export abstract class Event<S = Unknown, D = Unknown, M = Unknown> {
    * @param attributes - Event data.
    */
   constructor(data: D, meta: M, deleted?: Deleted) {
+    this.id = uuid();
     this.data = data;
     this.meta = {
       ...meta,

@@ -14,6 +14,24 @@ export class Stream<Args = unknown> {
   }
 
   /**
+   * Apply the provided event to the stream.
+   *
+   * @param event - Event to apply to the stream.
+   */
+  public async apply<T extends Event>(event: T): Promise<void> {
+    await this.stream.add(this.id, event);
+  }
+
+  /**
+   * Apply the provided event to the stream.
+   *
+   * @param event - Event to apply to the stream.
+   */
+  public async rehydrate<T extends Event>(event: T): Promise<void> {
+    await this.stream.rehydrate(this.id, event);
+  }
+
+  /**
    * Retrieve list of events in the stream.
    *
    * @param args - List of stream arguments.
@@ -22,14 +40,5 @@ export class Stream<Args = unknown> {
    */
   public async get<T extends Event>(...args: Args[]): Promise<T[]> {
     return this.stream.get(this.id, ...args);
-  }
-
-  /**
-   * Apply the provided event to the stream.
-   *
-   * @param event - Event to apply to the stream.
-   */
-  public async apply<T extends Event>(event: T): Promise<void> {
-    await this.stream.add(this.id, event);
   }
 }
