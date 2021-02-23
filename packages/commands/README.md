@@ -1,1 +1,0 @@
-[Docs](https://snapgravy.gitbook.io/commands/)
