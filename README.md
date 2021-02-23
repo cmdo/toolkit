@@ -9,7 +9,7 @@ This is a mono repository containing all toolkit packages utilized by the cmdo f
 Package  | Description
 ---------|------------------------------------------------------------------------------------
 Access   | _Access control service handling permissions for back and front end._
-Commands | _Event sourced command service, handling incoming commands and event storage._
+Events   | _Event sourced stream and storage service._
 Http     | _Simple 0 dependency http server._
 Inverse  | _Inversion of control service handling those pesky dependency injections._
 Router   | _An agnostic routing solution for your SPA needs._
