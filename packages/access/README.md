@@ -1,4 +1,5 @@
-Access Control
-==============
+# Access Control
 
-[Gitbook](https://snapgravy.gitbook.io/access-control/)
+A simple access control service.
+
+[Docs](https://docs.kodemon.net/access-control)

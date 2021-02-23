@@ -1,3 +1,5 @@
 # Inverse
 
-A simple dependency service.
+A simple dependency injection service.
+
+[Docs](https://docs.kodemon.net/inverse)
