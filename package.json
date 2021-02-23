@@ -34,7 +34,23 @@
     "clean:http": "cd ./packages/http && yarn clean",
     "clean:inverse": "cd ./packages/inverse && yarn clean",
     "clean:router": "cd ./packages/router && yarn clean",
-    "clean:socket": "cd ./packages/socket && yarn clean"
+    "clean:socket": "cd ./packages/socket && yarn clean",
+
+    "mount": "yarn link:access && yarn link:events && yarn link:http && yarn link:inverse && yarn link:router && yarn link:socket",
+    "link:access": "cd ./packages/access && yarn link",
+    "link:events": "cd ./packages/events && yarn link",
+    "link:http": "cd ./packages/http && yarn link",
+    "link:inverse": "cd ./packages/inverse && yarn link",
+    "link:router": "cd ./packages/router && yarn link",
+    "link:socket": "cd ./packages/socket && yarn link",
+
+    "dismount": "yarn unlink:access && yarn unlink:events && yarn unlink:http && yarn unlink:inverse && yarn unlink:router && yarn unlink:socket",
+    "unlink:access": "cd ./packages/access && yarn unlink",
+    "unlink:events": "cd ./packages/events && yarn unlink",
+    "unlink:http": "cd ./packages/http && yarn unlink",
+    "unlink:inverse": "cd ./packages/inverse && yarn unlink",
+    "unlink:router": "cd ./packages/router && yarn unlink",
+    "unlink:socket": "cd ./packages/socket && yarn unlink"
   },
   "devDependencies": {
     "@types/jest": "26.0.20",
