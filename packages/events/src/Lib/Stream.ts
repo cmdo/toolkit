@@ -1,7 +1,7 @@
 import { container } from "../Container";
 import { Event } from "./Event";
 
-export class Stream<Args = unknown> {
+export class Stream {
   /**
    * Create a new Stream instance.
    *
@@ -9,26 +9,18 @@ export class Stream<Args = unknown> {
    * @param stream - Event stream service.
    */
   constructor(public id: string, private stream = container.get("Stream")) {
-    this.get = this.get.bind(this);
     this.apply = this.apply.bind(this);
+    this.get = this.get.bind(this);
   }
 
   /**
    * Apply the provided event to the stream.
    *
    * @param event - Event to apply to the stream.
+   * @param args  - List of apply arguments.
    */
-  public async apply<T extends Event>(event: T): Promise<void> {
-    await this.stream.add(this.id, event);
-  }
-
-  /**
-   * Apply the provided event to the stream.
-   *
-   * @param event - Event to apply to the stream.
-   */
-  public async rehydrate<T extends Event>(event: T): Promise<void> {
-    await this.stream.rehydrate(this.id, event);
+  public async apply<T extends Event>(event: T, ...args: unknown[]): Promise<void> {
+    await this.stream.add(this.id, event, ...args);
   }
 
   /**
@@ -38,7 +30,7 @@ export class Stream<Args = unknown> {
    *
    * @returns Events
    */
-  public async get<T extends Event>(...args: Args[]): Promise<T[]> {
+  public async get<T extends Event>(...args: unknown[]): Promise<T[]> {
     return this.stream.get(this.id, ...args);
   }
 }

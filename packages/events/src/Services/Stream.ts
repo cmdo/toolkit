@@ -6,19 +6,16 @@ export type StreamService = {
   /**
    * Add event to a persistent data store.
    *
+   * @remarks
+   * A sourced event is an event that is provided from a different persistence
+   * source. As such we may want to alter the behavior of the add method, such as
+   * not pass the event back to the persistence source if it already exists.
+   *
    * @param streamId - Stream id to persist the event under.
    * @param event    - Event to persist.
+   * @param args     - Provider arguments.
    */
-  add(streamId: string, event: Event): Promise<void>;
-
-  /**
-   * Add event via re-hydrate operation. This differs from add in that we simply
-   * want to perform a simple event upsert and projection.
-   *
-   * @param streamId - Stream being re-hydrated.
-   * @param event    - Event to re-hydrate.
-   */
-  rehydrate(streamId: string, event: Event): Promise<void>;
+  add(streamId: string, event: Event, ...args: unknown[]): Promise<void>;
 
   /**
    * Get all events in order of creation for the provided event stream.
