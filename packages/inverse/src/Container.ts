@@ -8,8 +8,8 @@ import { Tokens } from "./Types/Token";
  * allowing the developer to program against TypeScript types or interfaces
  * with implementation details is injected by service providers.
  *
- * @author   Christoffer Rødvik <dev@kodemon.net>
- * @license  MIT
+ * @author  Christoffer Rødvik <dev@kodemon.net>
+ * @license MIT
  */
 export class Container<T extends Tokens> {
   private transients: Map<keyof T, unknown> = new Map();
@@ -51,6 +51,21 @@ export class Container<T extends Tokens> {
     if (transient) {
       return new (transient as Constructor<T>)(...args);
     }
-    throw new Error(`Cannot resolve ${token}, make sure to inject dependencies before they are used.`);
+    throw new Container.MissingDependencyError(token);
   }
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Errors
+   |--------------------------------------------------------------------------------
+   */
+
+  public static MissingDependencyError = class extends Error {
+    public type = "MissingDependencyError" as const;
+
+    constructor(token: string | number | symbol) {
+      super();
+      this.message = `Attempted to resolve unregistered dependency token: "${token.toString()}"`;
+    }
+  };
 }

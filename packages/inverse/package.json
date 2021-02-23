@@ -1,6 +1,6 @@
 {
   "name": "cmdo-inverse",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Inversion of control dependency injection service.",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
   "license": "MIT",
