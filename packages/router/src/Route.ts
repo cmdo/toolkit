@@ -1,24 +1,66 @@
-import { Policy } from "./Policy";
+import type { Before, Request } from "./Before";
 import { pathToRegexp } from "./Utils";
 
-/**
- * Represent the `Route` class that contains the routing details of a
- * specific application endpoint. It is assigned to a `Router` instance
- * via its `.register` method.
- *
- * @class
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
  */
+
+type After = (req: Request) => Promise<void>;
+
+/**
+ * Key/Value parameter definition.
+ */
+type Parameter = {
+  name: string;
+  value?: string;
+};
+
+type Options = {
+  /**
+   * Identifier, useful for determine active route in app components.
+   */
+  id: string;
+
+  /**
+   * Route title, usually for setting the document title of the page.
+   */
+  title: string;
+
+  /**
+   * Raw routing path, eg. /users/:slug
+   */
+  path: string;
+
+  /**
+   * Middleware to run before executing the route.
+   */
+  before?: Before[];
+
+  /**
+   * Handlers to run after the route has been resolved.
+   */
+  after?: After[];
+};
+
+/*
+ |--------------------------------------------------------------------------------
+ | Route
+ |--------------------------------------------------------------------------------
+ */
+
 export class Route {
   public components: any[] = [];
 
   public id: string;
+  public title: string;
   public path: string;
+  public before: Before[];
+  public after: After[];
+
   public regExp: RegExp;
   public params: Parameter[];
-  public policies: Policy[];
-
-  public before?: () => Promise<any>;
-  public after?: () => void;
 
   /**
    * Initializes a new `Route` instance.
@@ -29,14 +71,14 @@ export class Route {
   constructor(components: any | any[], options: Options) {
     this.components = Array.isArray(components) ? components : [components];
 
-    this.id = options.id;
-    this.path = options.path.replace(/\/$/, "");
     this.regExp = pathToRegexp(options.path);
     this.params = parseParams(options.path);
-    this.policies = options.policies || [];
 
-    this.before = options.before;
-    this.after = options.after;
+    this.id = options.id;
+    this.title = options.title;
+    this.path = options.path.replace(/\/$/, "");
+    this.before = options.before || [];
+    this.after = options.after || [];
   }
 
   /**
@@ -65,7 +107,7 @@ export class Route {
 
 /*
  |--------------------------------------------------------------------------------
- | Helper Functions
+ | Utilities
  |--------------------------------------------------------------------------------
 */
 
@@ -87,44 +129,3 @@ function parseParams(path: string): Parameter[] {
     return list;
   }, []);
 }
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-/**
- * Key/Value parameter definition.
- */
-type Parameter = {
-  name: string;
-  value?: string;
-};
-
-type Options = {
-  /**
-   * Identifier, useful for determine active route in app components.
-   */
-  id: string;
-
-  /**
-   * Raw routing path, eg. /users/:slug
-   */
-  path: string;
-
-  /**
-   * Policies to run before executing the route.
-   */
-  policies?: Policy[];
-
-  /**
-   * Executes before the route is rendered.
-   */
-  before?(...args: any[]): Promise<any>;
-
-  /**
-   * Executes after the routed has been rendered.
-   */
-  after?(...args: any[]): void;
-};

@@ -1,24 +1,62 @@
-import { RouterError } from "./Error";
-import type { History, Location } from "./History";
-import { responses } from "./Policy";
+import EventEmitter from "eventemitter3";
+import type { History, Location } from "history";
+
+import { response } from "./Before";
 import { Query } from "./Query";
 import { Route } from "./Route";
+import { State } from "./State";
 import { ValueStore } from "./ValueStore";
 
-/**
- * Framework agnostic router for single page applications.
- *
- * @author  Christoffer Rødvik <dev@kodemon.net>
- * @license MIT
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
  */
-export class Router {
+
+type Settings = {
+  /**
+   * Setting the base attribute tells the router that the app
+   * is being served from a subdirectory.
+   */
+  base?: string;
+};
+
+type Options = {
+  /**
+   * Render routed view template and component.
+   *
+   * @param route - Route to render.
+   * @param location - Current history location.
+   */
+  render(route: Route, location: Location, forced?: boolean): Promise<void>;
+
+  /**
+   * Handles an error that occurs during a routing request.
+   *
+   * @param error - Routing error.
+   */
+  error(error: MiddlewareError | NotFoundError): void;
+};
+
+type Result = {
+  route: Route;
+  match: any;
+};
+
+/*
+ |--------------------------------------------------------------------------------
+ | Router
+ |--------------------------------------------------------------------------------
+ */
+
+export class Router extends EventEmitter {
   public readonly history: History;
   public readonly base: string;
 
   public routes: Route[] = [];
   public query: Query;
   public params: ValueStore;
-  public state: ValueStore;
+  public state: State;
   public route?: Route;
   public unregister?: () => void;
 
@@ -29,11 +67,12 @@ export class Router {
    * @param settings - Router settings.
    */
   constructor(history: History, { base }: Settings = {}) {
+    super();
     this.base = getBase(base);
     this.history = history;
     this.query = new Query(history);
     this.params = new ValueStore();
-    this.state = new ValueStore();
+    this.state = new State();
   }
 
   /**
@@ -91,23 +130,33 @@ export class Router {
       const result = this.get(location.pathname);
       if (result) {
         const route = result.route;
-        const state = new ValueStore(location.state);
+        const state = new State(location.state);
         const query = new Query(this.history, location.search);
         const params = getParams(result);
 
-        // ### Policies
-        // If policies has been defined, validate each policy before assigning
-        // and routing the request.
+        // ### Initial Progress
 
-        for (const policy of route.policies) {
+        let total = route.before.length;
+        if (total > 0) {
+          if (total === 1) {
+            this.emit("progress", 50);
+          } else {
+            this.emit("progress", 5);
+          }
+        }
+
+        // ### Middleware
+
+        let index = 1;
+        for (const before of route.before) {
           try {
-            const res = await policy.call(responses, { route, query, params, state });
+            const res = await before.call(response, { route, query, params, state });
             switch (res.status) {
               case "accept": {
                 break;
               }
               case "reject": {
-                return options.error(new RouterError(res.message, res.details));
+                return options.error(new MiddlewareError(res.message, res.details));
               }
               case "redirect": {
                 if (res.isExternal) {
@@ -119,10 +168,11 @@ export class Router {
           } catch (err) {
             return options.error(err);
           }
+          index += 1;
+          this.emit("progress", (index / total) * 100);
         }
 
         // ### Update Router
-        // Set the new location, query, params, and route to the router.
 
         this.route = route;
         this.state = state;
@@ -130,17 +180,19 @@ export class Router {
         this.params = params;
 
         // ### Render
-        // Send route request to the registered render handler.
 
         options.render(route, location).catch(options.error);
+
+        // ### Afterware
+
+        for (const after of route.after) {
+          after({ route, query, params, state });
+        }
       } else {
-        options.error(
-          new RouterError("Route does not exist, or has been moved to another location.", {
-            status: 404,
-            code: "ROUTE_NOT_FOUND"
-          })
-        );
+        options.error(new NotFoundError(location.pathname));
       }
+
+      this.emit("progress", 0);
     });
     return this;
   }
@@ -152,7 +204,14 @@ export class Router {
    * @param state - State to deliver with the route.
    */
   public goTo(path: string, state: any = {}) {
-    this.history.push((this.base + path.replace(this.base, "")).replace(/\/$/, ""), state);
+    const parts = (this.base + path.replace(this.base, "")).replace(/\/$/, "").split("?");
+    this.history.push(
+      {
+        pathname: parts[0],
+        search: parts[1] ? `?${parts[1]}` : ""
+      },
+      state
+    );
   }
 
   /**
@@ -175,7 +234,34 @@ export class Router {
 
 /*
  |--------------------------------------------------------------------------------
- | Utilties
+ | Errors
+ |--------------------------------------------------------------------------------
+ */
+
+class MiddlewareError extends Error {
+  public readonly type = "MiddlewareError" as const;
+
+  public readonly details: any;
+
+  constructor(message: string, details: any = {}) {
+    super(message);
+    this.details = details;
+  }
+}
+class NotFoundError extends Error {
+  public readonly type = "NotFoundError" as const;
+
+  public readonly path: any;
+
+  constructor(path: string) {
+    super("Route does not exist, or has been moved to another location.");
+    this.path = path;
+  }
+}
+
+/*
+ |--------------------------------------------------------------------------------
+ | Utilities
  |--------------------------------------------------------------------------------
  */
 
@@ -213,39 +299,3 @@ function getBase(path?: string): string {
   }
   return path;
 }
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-type Settings = {
-  /**
-   * Setting the base attribute tells the router that the app
-   * is being served from a subdirectory.
-   */
-  base?: string;
-};
-
-type Options = {
-  /**
-   * Render routed view template and component.
-   *
-   * @param route - Route to render.
-   * @param location - Current history location.
-   */
-  render(route: Route, location: Location, forced?: boolean): Promise<void>;
-
-  /**
-   * Handles an error that occurs during a routing request.
-   *
-   * @param error - Error reported during invalid routing.
-   */
-  error(error: any): void;
-};
-
-type Result = {
-  route: Route;
-  match: any;
-};

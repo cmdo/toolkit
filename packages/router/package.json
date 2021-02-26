@@ -1,8 +1,8 @@
 {
   "name": "cmdo-router",
   "description": "Framework agnostic routing solution for single page web applications.",
-  "version": "1.2.4",
-  "author": "Christoffer Rodvik <christoffer@kodemon.net>",
+  "version": "2.0.0",
+  "author": "Christoffer Rødvik <dev@kodemon.net>",
   "license": "MIT",
   "repository": "https://github.com/cmdo/toolkit.git",
   "keywords": [
@@ -19,5 +19,9 @@
     "compile": "../../node_modules/.bin/tsc -b",
     "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
     "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+  "dependencies": {
+    "eventemitter3": "4.0.7",
+    "history": "5.0.0"
   }
 }

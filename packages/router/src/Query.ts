@@ -1,11 +1,23 @@
-import type { History } from "./History";
+import type { History } from "history";
+
 import { ValueStore } from "./ValueStore";
 
-/**
- * Query value store providing access to url query attributes.
- *
- * @class
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
  */
+
+type QueryObject = {
+  [key: string]: string;
+};
+
+/*
+ |--------------------------------------------------------------------------------
+ | Query
+ |--------------------------------------------------------------------------------
+ */
+
 export class Query extends ValueStore {
   public readonly history: History;
 
@@ -13,7 +25,7 @@ export class Query extends ValueStore {
    * Initializes a new `Query` instance.
    *
    * @param history - History instance.
-   * @param search - Query search value.
+   * @param search  - Query search value.
    */
   constructor(history: History, search = "") {
     super(toQueryObject(search));
@@ -24,7 +36,7 @@ export class Query extends ValueStore {
    * Updates the current query store, and triggers a history push to the
    * new location.
    *
-   * @param key - Key to update the value for.
+   * @param key   - Key to update the value for.
    * @param value - Value to add to the key.
    */
   public set(key: string | QueryObject, value?: string | number): void {
@@ -88,7 +100,7 @@ export class Query extends ValueStore {
 
 /*
  |--------------------------------------------------------------------------------
- | Helper Functions
+ | Utilities
  |--------------------------------------------------------------------------------
  */
 
@@ -128,7 +140,3 @@ function toQueryObject(search: string): any {
   }
   return result;
 }
-
-type QueryObject = {
-  [key: string]: string;
-};

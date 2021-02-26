@@ -1,4 +1,5 @@
-import { createBrowserHistory } from "../History";
+import { createBrowserHistory } from "history";
+
 import { Query } from "../Query";
 
 describe("Query", () => {

@@ -1,23 +1,42 @@
 import About from "./About.svelte";
 import Home from "./Home.svelte";
-import { Route, Policy, router } from "./router";
+import { Request, Response, Route, router } from "./router";
 
-const redirect: Policy = function redirect() {
+async function setPageTitle(this: Response, req: Request) {
+  window.document.title = `Router Demo | ${req.route.title}`;
+  return this.accept();
+}
+
+async function delay(this: Response) {
+  await new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, Math.floor(Math.random() * (2000 - 500 + 1) + 500));
+  });
+  return this.accept();
+}
+
+async function redirect(this: Response) {
   return this.redirect("https://google.com", true);
 }
 
 router.register([
   new Route(Home, {
     id: "home",
-    path: "/"
+    title: "Home",
+    path: "/",
+    before: [setPageTitle, delay]
   }),
   new Route(About, {
     id: "about",
-    path: "/about"
+    title: "About",
+    path: "/about",
+    before: [setPageTitle, delay, delay]
   }),
   new Route(About, {
-    id: "about",
+    id: "about-external",
+    title: "About External",
     path: "/external",
-    policies: [redirect]
+    before: [setPageTitle, redirect]
   })
 ]);
