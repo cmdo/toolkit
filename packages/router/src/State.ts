@@ -1,10 +1,14 @@
 export class State {
+  private store: any;
+
   /**
    * Initializes a new State instance.
    *
    * @param state - State object. Default: {}
    */
-  constructor(private store: any = {}) {}
+  constructor(store?: any) {
+    this.store = store || {};
+  }
 
   /**
    * Add additional state properties to ValueStore.

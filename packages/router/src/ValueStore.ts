@@ -12,8 +12,8 @@ export class ValueStore {
    *
    * @param state - State object.
    */
-  constructor(state: any = {}) {
-    this.store = Object.freeze(state);
+  constructor(state?: any) {
+    this.store = Object.freeze(state || {});
   }
 
   /**
