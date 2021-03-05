@@ -9,21 +9,21 @@ import { uuid } from "./Uuid";
 
 type Unknown = Record<string, unknown>;
 
-type Deleted = "soft" | "hard";
+type Props<Data, Meta> = {
+  id?: string;
+  data: Data;
+  meta: Meta & {
+    timestamp?: string;
+    deleted?: Deleted;
+  };
+};
 
 export type Meta<T> = T & {
-  /**
-   * UNIX timestamp of when the event was created. This value is also used for
-   * sorting the event stream. Defaults to the time of creation if not manually
-   * provided.
-   */
   timestamp: string;
-
-  /**
-   * Delete state of the event.
-   */
   deleted?: Deleted;
 };
+
+type Deleted = "soft" | "hard";
 
 /*
  |--------------------------------------------------------------------------------
@@ -31,25 +31,24 @@ export type Meta<T> = T & {
  |--------------------------------------------------------------------------------
  */
 
-export abstract class Event<S = Unknown, D = Unknown, M = Unknown> {
+export abstract class Event<State = Unknown, Data = Unknown, MetaData = Unknown> {
   public abstract readonly type: string;
 
   public readonly id: string;
-  public readonly data: D;
-  public readonly meta: Meta<M>;
+  public readonly data: Data;
+  public readonly meta: Meta<MetaData>;
 
   /**
    * Create new Event instance.
    *
-   * @param attributes - Event data.
+   * @param props - Event properties.
    */
-  constructor(data: D, meta: M, deleted?: Deleted) {
-    this.id = uuid();
+  constructor({ id = uuid(), data, meta }: Props<Data, MetaData>) {
+    this.id = id;
     this.data = data;
     this.meta = {
       ...meta,
-      timestamp: Timestamp.send(clock).toString(),
-      deleted
+      timestamp: meta.timestamp || Timestamp.send(clock).toString()
     };
   }
 
@@ -60,5 +59,5 @@ export abstract class Event<S = Unknown, D = Unknown, M = Unknown> {
    *
    * @returns State
    */
-  public abstract fold(state: S): S;
+  public abstract fold(state: State): State;
 }

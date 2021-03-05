@@ -1,7 +1,7 @@
 {
-  "name": "cmdo-events",
-  "version": "1.0.2",
-  "description": "Event stream service",
+  "name": "cmdo-event",
+  "version": "1.0.0",
+  "description": "Event model",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
   "license": "MIT",
@@ -16,7 +16,6 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'"
   },
   "dependencies": {
-    "cmdo-inverse": "*",
     "murmurhash": "^2.0.0"
   }
 }
