@@ -9,61 +9,21 @@
   "repository": {
     "url": "https://github.com/cmdo/toolkit.git"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "build:access": "cd ./packages/access && yarn build && cd ../../ && yarn clear",
-    "build:events": "cd ./packages/events && yarn build && cd ../../ && yarn clear",
-    "build:http": "cd ./packages/http && yarn build && cd ../../ && yarn clear",
-    "build:inverse": "cd ./packages/inverse && yarn build && cd ../../ && yarn clear",
-    "build:router": "cd ./packages/router && yarn build && cd ../../ && yarn clear",
-    "build:socket": "cd ./packages/socket && yarn build && cd ../../ && yarn clear",
-
-    "clear": "yarn clear:access && yarn clear:events && yarn clear:http && yarn clear:inverse && yarn clear:router && yarn clear:socket",
-    "clear:access": "cd ./packages/access && rm -rf tsconfig.tsbuildinfo",
-    "clear:events": "cd ./packages/events && rm -rf tsconfig.tsbuildinfo",
-    "clear:http": "cd ./packages/http && rm -rf tsconfig.tsbuildinfo",
-    "clear:inverse": "cd ./packages/inverse && rm -rf tsconfig.tsbuildinfo",
-    "clear:router": "cd ./packages/router && rm -rf tsconfig.tsbuildinfo",
-    "clear:socket": "cd ./packages/socket && rm -rf tsconfig.tsbuildinfo",
-    
-    "clean": "yarn clean:access && yarn clean:events && yarn clean:http && yarn clean:inverse && yarn clean:router && yarn clean:socket",
-    "clean:access": "cd ./packages/access && yarn clean",
-    "clean:events": "cd ./packages/events && yarn clean",
-    "clean:http": "cd ./packages/http && yarn clean",
-    "clean:inverse": "cd ./packages/inverse && yarn clean",
-    "clean:router": "cd ./packages/router && yarn clean",
-    "clean:socket": "cd ./packages/socket && yarn clean",
-
-    "mount": "yarn link:access && yarn link:events && yarn link:http && yarn link:inverse && yarn link:router && yarn link:socket",
-    "link:access": "cd ./packages/access && yarn link",
-    "link:events": "cd ./packages/events && yarn link",
-    "link:http": "cd ./packages/http && yarn link",
-    "link:inverse": "cd ./packages/inverse && yarn link",
-    "link:router": "cd ./packages/router && yarn link",
-    "link:socket": "cd ./packages/socket && yarn link",
-
-    "dismount": "yarn unlink:access && yarn unlink:events && yarn unlink:http && yarn unlink:inverse && yarn unlink:router && yarn unlink:socket",
-    "unlink:access": "cd ./packages/access && yarn unlink",
-    "unlink:events": "cd ./packages/events && yarn unlink",
-    "unlink:http": "cd ./packages/http && yarn unlink",
-    "unlink:inverse": "cd ./packages/inverse && yarn unlink",
-    "unlink:router": "cd ./packages/router && yarn unlink",
-    "unlink:socket": "cd ./packages/socket && yarn unlink"
+    "clean": "yarn --cwd ./packages/access clean && yarn --cwd ./packages/domain clean && yarn --cwd ./packages/http clean && yarn --cwd ./packages/inverse clean && yarn --cwd ./packages/router clean && yarn --cwd ./packages/socket clean"
   },
   "devDependencies": {
-    "@types/jest": "26.0.20",
+    "@types/jest": "26.0.22",
     "@types/ws": "7.4.0",
-    "@typescript-eslint/eslint-plugin": "4.13.0",
-    "@typescript-eslint/parser": "4.13.0",
-    "eslint": "7.17.0",
-    "eslint-config-prettier": "7.1.0",
+    "@typescript-eslint/eslint-plugin": "4.19.0",
+    "@typescript-eslint/parser": "4.19.0",
+    "eslint": "7.22.0",
+    "eslint-config-prettier": "8.1.0",
     "eslint-plugin-prettier": "3.3.1",
     "eslint-plugin-simple-import-sort": "7.0.0",
     "jest": "26.6.3",
     "prettier": "2.2.1",
-    "ts-jest": "26.4.4",
-    "typescript": "4.1.3"
+    "ts-jest": "26.5.4",
+    "typescript": "4.2.3"
   }
 }

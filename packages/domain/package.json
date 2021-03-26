@@ -17,8 +17,8 @@
   ],
   "scripts": {
     "prepublishOnly": "yarn build",
-    "build": "yarn clean && yarn compile",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
+    "build": "yarn clean && yarn && yarn compile",
+    "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
     "compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
     "watch": "./node_modules/.bin/nodemon",
     "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
