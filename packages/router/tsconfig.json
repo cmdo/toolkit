@@ -1,16 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es6",
-      "es2017"
-    ],
+    "target": "ES2018",
+    "module": "ES2020",
     "moduleResolution": "node",
-    "target": "es5",
     "rootDir": "./src",
     "outDir": "./dist"
   },
-  "include": ["src/**/*"]
+  "include": ["src"]
 }

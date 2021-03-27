@@ -200,14 +200,14 @@ export class Router extends EventEmitter {
   /**
    * Redirect the client to the provided pathname/link.
    *
-   * @param path - Path to route to.
+   * @param path  - Path to route to.
    * @param state - State to deliver with the route.
    */
-  public goTo(path: string, state: any = {}) {
+  public goTo(path: string, state: any = {}): void {
     const parts = (this.base + path.replace(this.base, "")).replace(/\/$/, "").split("?");
     this.history.push(
       {
-        pathname: parts[0],
+        pathname: parts[0] || "/",
         search: parts[1] ? `?${parts[1]}` : ""
       },
       state
