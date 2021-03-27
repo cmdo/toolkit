@@ -1,7 +1,7 @@
 {
   "name": "cmdo-router",
   "description": "Framework agnostic routing solution for single page web applications.",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
   "license": "MIT",
   "repository": "https://github.com/cmdo/toolkit.git",
@@ -10,20 +10,30 @@
     "web",
     "spa"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "yarn clean && yarn && yarn compile",
     "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
-    "compile": "../../node_modules/.bin/tsc -b",
-    "watch": "../../node_modules/.bin/tsc -w",
+    "compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
+    "watch": "./node_modules/.bin/nodemon",
     "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
-    "lint": "eslint 'src/**/*.{ts,tsx}'"
+    "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   },
   "dependencies": {
     "eventemitter3": "4.0.7",
     "history": "5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.7"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src/"
+    ],
+    "ext": "ts",
+    "exec": "yarn compile"
   }
 }
