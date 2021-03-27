@@ -10,7 +10,9 @@
     "url": "https://github.com/cmdo/toolkit.git"
   },
   "scripts": {
-    "clean": "yarn --cwd ./packages/access clean && yarn --cwd ./packages/domain clean && yarn --cwd ./packages/http clean && yarn --cwd ./packages/inverse clean && yarn --cwd ./packages/router clean && yarn --cwd ./packages/socket clean"
+    "clean": "yarn --cwd ./packages/access clean && yarn --cwd ./packages/domain clean && yarn --cwd ./packages/http clean && yarn --cwd ./packages/inverse clean && yarn --cwd ./packages/router clean && yarn --cwd ./packages/socket clean",
+    "api": "yarn --cwd ./api dev",
+    "app": "yarn --cwd ./app dev"
   },
   "devDependencies": {
     "@types/jest": "26.0.22",

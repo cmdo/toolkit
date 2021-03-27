@@ -1,0 +1,33 @@
+{
+	"root": true,
+	"parserOptions": {
+    "ecmaVersion": 2019,
+    "sourceType": "module"
+  },
+	"plugins": ["svelte3", "simple-import-sort"],
+	"extends": ["eslint:recommended"],
+	"overrides": [
+    {
+      "files": ["*.svelte"],
+      "processor": "svelte3/svelte3"
+    },
+		{
+      "files": ["*.ts", "*.cjs"],
+      "parser": "@typescript-eslint/parser",
+			"extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended", // TypeScript rules
+        "prettier/@typescript-eslint", // Prettier plugin
+        "plugin:prettier/recommended" // Prettier recommended rules 
+      ]
+		}
+  ],
+	"rules": {
+		"@typescript-eslint/no-var-requires": "off",
+		"@typescript-eslint/prefer-arrow-callback": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+		"quotes": ["error", "double"],
+		"simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
+	}
+}
