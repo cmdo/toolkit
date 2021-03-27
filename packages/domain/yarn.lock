@@ -2,14 +2,6 @@
 # yarn lockfile v1
 
 
-"@consento/hlc@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@consento/hlc/-/hlc-2.1.0.tgz#bc819e7c4665eab7b3b1262844223e4a52af144a"
-  integrity sha512-hNk+H4vDENBzhZhxrKfUqeqOpKGkOxR6tTy9A69sEydgGVgib3Sjrwb3xGmSRAebUL4WDRvSHmB4ke5xxr1C1A==
-  dependencies:
-    bigint-time "^1.0.2"
-    longfn "^1.1.0"
-
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -75,11 +67,6 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
-
-bigint-time@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/bigint-time/-/bigint-time-1.0.2.tgz#ec36011d0f160369b6c9f780a2863387dcbe9b07"
-  integrity sha512-T6vpQLR9NL5WEKPv1f4KRvwrujEbq5dDsNvooSEi1hVsBX4UUYJXLRKjfG1YeukSp4QqWwcW80rj39XGO/G8/A==
 
 binary-extensions@^2.0.0:
   version "2.2.0"
@@ -494,11 +481,6 @@ latest-version@^5.0.0:
   integrity sha512-weT+r0kTkRQdCdYCNtkMwWXQTMEswKrFBkm4ckQOMVhhqhIMI1UT2hMj+1iigIhgSZm5gTmrRXBNoGUgaTY1xA==
   dependencies:
     package-json "^6.3.0"
-
-longfn@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/longfn/-/longfn-1.1.0.tgz#161a1579efcb5cad6dc2cf0b8abec685688de463"
-  integrity sha512-WnrejPGKlvgHSG4H5PbzaRBhRALbyW3xtPgGLC95Q5+v4ipWTMKU+a9kB/k3HAUeBwKSOnGnX6UveY+NHdfLEw==
 
 lowercase-keys@^1.0.0, lowercase-keys@^1.0.1:
   version "1.0.1"

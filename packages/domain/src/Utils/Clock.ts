@@ -1,6 +1,5 @@
-import HLC from "@consento/hlc";
-
 import { container } from "../Container";
+import { HLC, Timestamp } from "./HLC";
 
 const clock = new HLC();
 
@@ -13,7 +12,7 @@ const clock = new HLC();
  */
 export function getId(origin: string = container.get("EventStore").replica()): string {
   const ts = clock.now().toJSON();
-  return `${ts.wallTime}-${ts.logical}@${origin}`;
+  return `${ts.time}-${ts.logical}@${origin}`;
 }
 
 /**
@@ -23,10 +22,10 @@ export function getId(origin: string = container.get("EventStore").replica()): s
  *
  * @returns HLC.Timestamp
  */
-export function getTimestamp(id: string): HLC.Timestamp {
-  const [time] = id.split("@");
-  const [wallTime, logical] = time.split("-");
-  return new HLC.Timestamp({ wallTime, logical: Number(logical) });
+export function getTimestamp(id: string): Timestamp {
+  const [timestamp] = id.split("@");
+  const [time, logical] = timestamp.split("-");
+  return new Timestamp(time, Number(logical));
 }
 
 /**
@@ -37,7 +36,7 @@ export function getTimestamp(id: string): HLC.Timestamp {
  * @returns Unix timestamp.
  */
 export function getUnixTimestamp(id: string): number {
-  return Number(getTimestamp(id).wallTime) / 1000000;
+  return getTimestamp(id).time;
 }
 
 /**
@@ -61,7 +60,7 @@ export function getDate(id: string): Date {
  * @returns Timestamps.
  */
 export async function runTimestampTest(i = 10, min = 0, max = 1000) {
-  let timestamps: { count: number; id: string; ts: HLC.Timestamp; dt: Date }[] = [];
+  let timestamps: { count: number; id: string; ts: Timestamp; dt: Date }[] = [];
 
   let y = 0;
   while (i--) {
