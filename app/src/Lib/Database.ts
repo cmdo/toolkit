@@ -1,11 +1,13 @@
-import { EventDescriptor, getId, publisher } from "cmdo-domain";
+import { getId, publisher } from "cmdo-domain";
 import Loki from "lokijs";
 import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter";
 
 import { container } from "../Container";
 import type { TenantStore } from "../Services/TenantStore";
+import type { EventDescriptor } from "../Providers/EventStore";
 import { orderByOriginId } from "../Utils/Sort";
 import { socket } from "./Socket";
+import { api } from "./Request";
 
 /*
  |--------------------------------------------------------------------------------
@@ -13,7 +15,13 @@ import { socket } from "./Socket";
  |--------------------------------------------------------------------------------
  */
 
-export type Collection = "events" | "samples" | "weeks" | "items";
+export type Collection = "events" | "users";
+
+type RemoteEventDescriptor = {
+  tenant: string;
+  event: EventDescriptor;
+  version: string;
+}
 
 /*
  |--------------------------------------------------------------------------------
@@ -23,19 +31,11 @@ export type Collection = "events" | "samples" | "weeks" | "items";
 
 const collections: Record<Collection, Partial<CollectionOptions<any>>> = {
   events: {
-    unique: ["version", "event.meta.oid"],
+    unique: ["originId"],
     indices: ["id"],
     disableMeta: true
   },
-  samples: {
-    unique: ["id"],
-    disableMeta: true
-  },
-  weeks: {
-    unique: ["id"],
-    disableMeta: true
-  },
-  items: {
+  users: {
     unique: ["id"],
     disableMeta: true
   }
@@ -53,17 +53,16 @@ const collections: Record<Collection, Partial<CollectionOptions<any>>> = {
  * @param tenantId - Tenant id to load.
  */
 export async function loadTenant(tenantId: string): Promise<void> {
-  const name = `tenant-${tenantId}`;
   const prevDb = getTenant();
   if (prevDb) {
     socket.off(`${prevDb.filename}:event`, handleEvent);
     prevDb.close();
   }
-  if (!prevDb || prevDb.filename !== name) {
-    const nextDb = new Loki(name, { adapter: new IncrementalIndexedDBAdapter() });
+  if (!prevDb || prevDb.filename !== tenantId) {
+    const nextDb = new Loki(tenantId, { adapter: new IncrementalIndexedDBAdapter() });
     container.set("TenantStore", nextDb);
     await loadTenantCollections(nextDb);
-    socket.on(`${name}:event`, handleEvent);
+    socket.on(`${tenantId}:event`, handleEvent);
   }
 }
 
@@ -73,9 +72,8 @@ export async function loadTenant(tenantId: string): Promise<void> {
  * @param tenantId - Tenant id to delete.
  */
 export async function deleteTenant(tenantId: string) {
-  const name = `tenant-${tenantId}`;
   const db = getTenant();
-  if (db && db.filename === name) {
+  if (db && db.filename === tenantId) {
     db.deleteDatabase();
   }
 }
@@ -115,33 +113,81 @@ async function loadTenantCollections(db: TenantStore): Promise<void> {
   });
 }
 
-/**
- * Handle incoming event requests.
- *
- * @param descriptor - Event descriptor.
+/*
+ |--------------------------------------------------------------------------------
+ | Synchronization
+ |--------------------------------------------------------------------------------
  */
-function handleEvent(descriptor: EventDescriptor, db = container.get("TenantStore")) {
-  const collection = db.getCollection("events");
 
-  const count = collection.count({ "event.meta.oid": descriptor.event.meta.oid });
+/**
+ * Handle incoming event notification.
+ * 
+ * @remarks
+ * 
+ * If the originSocketId matches the current clients socket id, and the previous
+ * local id is the one we have cached locally. We skip the syncing process since
+ * we now know that the next local id came right after the last known local id.
+ * 
+ * If the above use case is not valid then we check if the current local id is
+ * younger than the next local id. If they do not match we are out of sync and
+ * send another sync request to get back to parity.
+ *
+ * @param originSocketId - Socket id of the client that logged the event.
+ * @param tenantId       - Tenant id in which the event was logged under.
+ * @param prevLocalId    - Local id of the last known event before the next event.
+ * @param nextLocalId    - Local id of the logged event.
+ */
+function handleEvent(originSocketId: string | undefined, tenantId: string, prevLocalId: string | undefined, nextLocalId: string) {
+  const currentLocalId = localStorage.getItem(tenantId) || undefined;
+  if (originSocketId === socket?.id && currentLocalId === prevLocalId) {
+    localStorage.setItem(tenantId, nextLocalId);
+  } else if (!currentLocalId || currentLocalId < nextLocalId) {
+    sync(tenantId);
+  }
+}
+
+/**
+ * Request un-synced events from remote replica.
+ * 
+ * @param tenantId - Tenant id to sync events for.
+ */
+export async function sync(tenantId: string): Promise<void> {
+  const timestamp = localStorage.getItem(tenantId) || "";
+  const res = await api.get<{ timestamp: string; events: RemoteEventDescriptor[]; }>(`/tenants/${tenantId}/sync?timestamp=${timestamp}`);
+  switch (res.status) {
+    case "success": {
+      localStorage.setItem(tenantId, res.data.timestamp)
+      for (const descriptor of res.data.events) {
+        addRemoteEvent(descriptor);
+      }
+      break;
+    }
+    case "error": {
+      console.log(res);
+      break;
+    }
+  }
+}
+
+/**
+ * Add event from remote replica.
+ *
+ * @param remote - Remote event descriptor.
+ */
+ function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("TenantStore")) {
+  const collection = db.getCollection<EventDescriptor>("events");
+
+  const count = collection.count({ "originId": remote.event.originId });
   if (count > 0) {
-    console.log("Already have event, skipping ...");
-    return; // we already have the event ...
+    return console.log("Already have event, skipping ..."); // we already have the event ...
   }
 
-  const events = collection.find({ id: descriptor.id, "event.type": descriptor.event.type }).sort(orderByOriginId);
-  const version = collection.count({ id: descriptor.id });
-
-  const last = events[events.length - 1];
-  if (!last || last.event.meta.oid < descriptor.event.meta.oid) {
-    descriptor.event.meta.lid = getId();
-    try {
-      const message = collection.insertOne({ ...descriptor, version: `${descriptor.id}-${version + 1}` });
-      if (message) {
-        publisher.publish(message.event);
-      }
-    } catch (error) {
-      console.log("Fail to hydrate incoming event", error);
+  try {
+    const event = collection.insertOne({ ...remote.event, localId: getId() });
+    if (event) {
+      publisher.publish(event);
     }
+  } catch (error) {
+    console.log("Fail to hydrate incoming event", error);
   }
 }

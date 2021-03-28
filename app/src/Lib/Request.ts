@@ -1,5 +1,6 @@
 import { config } from "../Config";
 import { getToken } from "./Auth";
+import { socket } from "./Socket";
 
 type SuccessResponse<Data = any> = {
   status: "success";
@@ -114,16 +115,14 @@ export const api = {
   async send<T = any>(endpoint: string, init: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
       const token = getToken();
-      if (token) {
-        init = {
-          ...init,
-          headers: {
-            ...(init.headers || {}),
-            authorization: `Bearer ${token}`
-          }
-        };
-      }
-      return await fetcher(`${config.api.uri}${endpoint}`, init);
+      return await fetcher(`${config.api.uri}${endpoint}`, {
+        ...init,
+        headers: {
+          ...(init.headers || {}),
+          authorization: token ? `Bearer ${token}` : undefined,
+          socket: socket.id
+        }
+      });
     } catch (err) {
       return {
         status: "error",

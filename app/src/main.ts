@@ -93,13 +93,13 @@ function isRelative(url: string): boolean {
  */
 
 async function main() {
-  await loadTenant("sample"); // TODO load this conditionally once resolved via auth
+  await loadTenant("toolkit"); // TODO load this conditionally once resolved via auth
 
   domain.set("EventStore", new EventStore());
 
   socket.connect();
 
-  await Promise.all([import("./Domains/Sample"), import("./Subscribers")]);
+  await Promise.all([import("./Subscribers")]);
 
   route();
 }

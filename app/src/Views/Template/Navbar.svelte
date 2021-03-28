@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Online from "./Icons/Online.svelte";
+  import Online from "../../Components/Icons/Online.svelte";
+  import Refresh from "../../Components/Icons/Refresh.svelte";
 
   export let title: string;
 </script>
@@ -16,6 +17,7 @@
   <!-- to bar right  -->
   <ul aria-label="top bar right" aria-orientation="horizontal" class="px-8 flex items-center">
     <li class="h-10 flex items-center">
+      <Refresh />
       <Online />
       <span class="ml-3">Kodemon [ Logout ]</span>
       <button title="Page Menu" aria-label="page menu" class="h-full w-10 ml-3 rounded-full border focus:outline-none focus:shadow-outline">

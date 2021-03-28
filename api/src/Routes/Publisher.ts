@@ -1,46 +1,63 @@
-import { getId, merkle } from "cmdo-domain";
-import { HttpSuccess, Route, router } from "cmdo-http";
+import { getId } from "cmdo-domain";
+import { HttpError, HttpSuccess, Route, router } from "cmdo-http";
 import { ws } from "cmdo-socket";
 
 import { log } from "../Logs/Stream";
-import { mongo } from "../Services/Mongo";
+import { EventDescriptor, mongo } from "../Services/Mongo";
 
 router.register([
   new Route({
     method: "post",
     path: "/tenants/:tenant/events",
-    handler: async ({ body, params }) => {
-      const tenant = params.tenant;
-      const description = { tenant, ...body };
+    handler: async ({ headers: { socket }, body, params: { tenant } }) => {
+      const collection = mongo.collection<EventDescriptor>("events");
 
-      // ### Local Id
-      // Add the local HLC and replica to the description.
+      const count = await collection.count({ tenant });
+      const prevDescriptor = await collection.findOne({ tenant, version: `${tenant}-${count}` });
+      const nextDescriptor: EventDescriptor = {
+        tenant,
+        event: {
+          ...body,
+          localId: getId("api")
+        },
+        version: `${tenant}-${count + 1}`
+      };
 
-      description.event.meta.lid = getId("api");
+      await collection.insertOne(nextDescriptor);
 
-      // ### Insert Event
-      // Insert event to the persistent event store.
+      log(nextDescriptor);
 
-      await mongo.collection("events").insertOne(description);
+      ws.publish(`${tenant}:event`, socket, tenant, prevDescriptor?.event.localId, nextDescriptor.event.localId);
 
-      // ### Merkle Root
-      // Generate and store a new merkle hash value for the tenant.
+      return new HttpSuccess();
+    }
+  }),
+  new Route({
+    method: "get",
+    path: "/tenants/:tenant/sync",
+    handler: async ({ params: { tenant }, query: { timestamp } }) => {
+      const collection = mongo.collection<EventDescriptor>("events");
 
-      const events = await mongo.collection("events").find({ tenant }).sort({ "event.meta.oid": 1 }).toArray();
-      const hash = merkle(events.map(event => event.hash));
-
-      mongo
-        .collection("hash")
-        .updateOne({ tenant }, { $set: { tenant, hash } }, { upsert: true })
-        .catch(error => {
-          console.log(error);
+      if (!timestamp) {
+        const events = await collection.find({ tenant }).sort({ "event.originId": 1 }).toArray();
+        if (events.length === 0) {
+          return new HttpError(404, "Tenant has no events.");
+        }
+        return new HttpSuccess({
+          timestamp: events[events.length - 1].event.localId,
+          events
         });
+      }
 
-      log(description);
+      const events = await collection
+        .find({ tenant, "event.localId": { $gt: timestamp } })
+        .sort({ "event.originId": 1 })
+        .toArray();
 
-      ws.publish(`tenant-${tenant}:event`, description);
-
-      return new HttpSuccess({ tenant, hash });
+      return new HttpSuccess({
+        timestamp: events.length > 0 ? events[events.length - 1].event.localId : timestamp,
+        events
+      });
     }
   })
 ]);

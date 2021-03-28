@@ -1,12 +1,11 @@
 import chalk from "chalk";
-import { EventDescriptor } from "cmdo-domain";
 
-export function log({ tenant, id, event, hash, version }: { tenant: string } & EventDescriptor): void {
+import { EventDescriptor } from "../Services/Mongo";
+
+export function log({ tenant, event, version }: EventDescriptor): void {
   console.log(chalk`\n{bgCyan.bold Event Stored}\n`);
   console.log(chalk`{cyan.bold Tenant}     ${tenant}`);
-  console.log(chalk`{cyan.bold Aggregate}  ${id}`);
   console.log(chalk`{cyan.bold Event} ${json(event)}`);
-  console.log(chalk`{cyan.bold Hash}       ${hash}`);
   console.log(chalk`{cyan.bold Version}    ${version}`);
 }
 

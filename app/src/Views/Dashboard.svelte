@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Template from "../Components/Template.svelte";
+  import Template from "./Template/Template.svelte";
 </script>
 
 <Template title="Dashboard">

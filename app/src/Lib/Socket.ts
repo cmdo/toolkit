@@ -27,6 +27,7 @@ type SocketMessage = {
  */
 
 class Socket extends EventEmitter {
+  public id?: string;
   public connected = false;
   public messages: SocketMessage[] = [];
 
@@ -72,8 +73,8 @@ class Socket extends EventEmitter {
     // Handle incoming message and convert it to an emitted event.
 
     this.ws.onmessage = (msg) => {
-      const { id, event, data } = JSON.parse(msg.data);
-      this.emit(id || event, data);
+      const { id, event, args } = JSON.parse(msg.data);
+      this.emit(id || event, ...args);
     };
 
     // ### Closed
@@ -110,6 +111,10 @@ class Socket extends EventEmitter {
         console.log("Socket re-attempting connection.");
       }
     };
+
+    this.on("handshake", (id) => {
+      this.id = id;
+    });
 
     return this;
   }

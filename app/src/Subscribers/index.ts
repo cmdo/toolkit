@@ -1,1 +1,1 @@
-import "./Sample";
+import "./User";

@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3";
 
 import { container } from "../Container";
+import { copy } from "../Utils/Copy";
 import type { Collection } from "./Database";
 import { observe, observeOne } from "./Observe";
 
@@ -295,9 +296,10 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Model attributes as JSON.
    */
-  public toJSON(): BaseAttributes {
-    return {
-      id: this.id
-    };
+  public toJSON(props: any): A {
+    return copy.json<A>({
+      id: this.id,
+      ...props
+    });
   }
 }
