@@ -60,8 +60,8 @@ export class SocketClient {
    * @param event - Event trigger.
    * @param data  - Event data.
    */
-  public async publish(event: string, data: any): Promise<void> {
-    this.queue.messages.push(JSON.stringify({ event, data }));
+  public async publish(event: string, ...args: any[]): Promise<void> {
+    this.queue.messages.push(JSON.stringify({ event, args }));
     this.processQueue();
   }
 
@@ -71,8 +71,8 @@ export class SocketClient {
    * @param id   - Response id.
    * @param data - Event handler response data.
    */
-  public async respond(id: string, data: any): Promise<void> {
-    this.queue.messages.push(JSON.stringify({ id, data }));
+  public async respond(id: string, ...args: any[]): Promise<void> {
+    this.queue.messages.push(JSON.stringify({ id, args }));
     this.processQueue();
   }
 

@@ -10,6 +10,11 @@ type Sockets = {
   [uuid: string]: SocketClient;
 };
 
+type PublishOptions = {
+  event: string;
+  filter?: string[];
+};
+
 export class SocketServer {
   /**
    * List of connected sockets.
@@ -93,6 +98,10 @@ export class SocketServer {
 
       handleConnect.call(socket, client);
 
+      // ### Publish Client Id
+
+      client.publish("handshake", client.id);
+
       // ### Remove Socket
       // Remove the socket from the socket list if the connection is closed.
 
@@ -107,11 +116,20 @@ export class SocketServer {
    * Publish an event to all the connected sockets.
    *
    * @param event - Event trigger.
-   * @param data  - Event data.
+   * @param args  - Event arguments.
    */
-  public publish(event: string, data: any): void {
+  public publish(options: PublishOptions, ...args: any[]): void;
+  public publish(target: string, ...args: any[]): void;
+  public publish(out: string | PublishOptions, ...args: any[]): void {
     for (const uuid in this.sockets) {
-      this.sockets[uuid].publish(event, data);
+      if (typeof out === "string") {
+        this.sockets[uuid].publish(out, ...args);
+      } else {
+        const { event, filter = [] } = out;
+        if (!filter.includes(uuid)) {
+          this.sockets[uuid].publish(event, ...args);
+        }
+      }
     }
   }
 }
