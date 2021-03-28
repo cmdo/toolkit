@@ -10,7 +10,7 @@ export class Repository<T extends AggregateRoot> {
    * @param aggregate - Aggregate to save.
    */
   public async save(aggregate: T): Promise<void> {
-    await this.storage.save(aggregate.id, aggregate.version, aggregate.changes);
+    await this.storage.save(aggregate.changes);
   }
 
   /**

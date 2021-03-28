@@ -1,4 +1,4 @@
-import { jsonCopy } from "./JsonCopy";
+import { copy } from "./Copy";
 
 /*
  |--------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ export class Timestamp {
    */
 
   public toJSON() {
-    return jsonCopy({
+    return copy.json({
       time: this.encode(),
       logical: this.logical
     });
@@ -210,7 +210,7 @@ export class HLC {
    */
 
   public toJSON() {
-    return jsonCopy({
+    return copy.json({
       maxOffset: this.maxOffset,
       timeUpperBound: this.timeUpperBound,
       toleratedForwardClockJump: this.toleratedForwardClockJump,

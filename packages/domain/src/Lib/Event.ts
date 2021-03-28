@@ -1,33 +1,35 @@
 import { getId } from "../Utils/Clock";
-import { jsonCopy } from "../Utils/JsonCopy";
+import { copy } from "../Utils/Copy";
+import { hash } from "../Utils/Merkle";
 
 export type EventClass<T> = {
   new (...args: any[]): T;
 };
 
-export type Meta = {
-  lid: string;
-  oid: string;
+export type BaseAttributes = {
+  type: string;
+  localId: string;
+  originId: string;
 };
 
-export abstract class Event {
+export abstract class Event<Attributes extends BaseAttributes = BaseAttributes> {
   public abstract readonly type: string;
 
-  public readonly meta: Meta;
+  constructor(public localId = getId(), public readonly originId = localId) {}
 
-  constructor() {
-    const id = getId();
-    this.meta = {
-      lid: id,
-      oid: id
-    };
+  public toHash() {
+    return hash({
+      ...this.toJSON(),
+      localId: undefined
+    });
   }
 
-  public toJSON(obj: any = {}): any {
-    return jsonCopy({
+  public toJSON(obj = {} as any): Attributes {
+    return copy.json({
       type: this.type,
-      ...obj,
-      meta: this.meta
+      localId: this.localId,
+      originId: this.originId,
+      ...obj
     });
   }
 }

@@ -4,6 +4,8 @@ import { Event, EventClass } from "./Event";
 
 type EventHandler<T> = (event: T) => Promise<void> | void;
 
+type EventKeys = Pick<Event, "type" | "localId" | "originId">;
+
 /*
  |--------------------------------------------------------------------------------
  | Event Publisher
@@ -25,8 +27,9 @@ export class EventPublisher extends EventEmitter {
    *
    * @param event - Event to publish.
    */
-  public publish(event: Event): void {
+  public publish(event: EventKeys & Record<string, unknown>): void {
     this.emit(event.type, event);
+    this.emit("publish", event);
   }
 
   /**

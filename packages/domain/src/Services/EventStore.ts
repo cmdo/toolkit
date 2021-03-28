@@ -15,17 +15,11 @@ export abstract class EventStoreService {
   public abstract replica(): string;
 
   /**
-   * Save non committed aggregate events to persisted event store.
+   * Add list of events to the event store.
    *
-   * @remarks
-   * If expected aggregate version is less than or equal to the current persisted
-   * version the save operation should fail and throw an error.
-   *
-   * @param aggregateId     - Aggregate entity id.
-   * @param expectedVersion - Version to expect to match with the latest aggregate event.
-   * @param event           - List of events to append.
+   * @param events - List of events to add.
    */
-  public abstract save(aggregateId: string, expectedVersion: number, events: Event[]): Promise<void>;
+  public abstract save(events: Event[]): Promise<void>;
 
   /**
    * Get list of aggregate events from the event store.
