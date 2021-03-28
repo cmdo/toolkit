@@ -31,7 +31,7 @@ export class HttpSuccess extends HttpResponse {
    *
    * @param data - (Optional) Data provided with the success response. Default: {}
    */
-  constructor(data?: any) {
+  constructor(data = {}) {
     super("success");
     this.data = data;
   }
@@ -110,7 +110,7 @@ export class HttpError extends HttpResponse {
    * @param message - Error message.
    * @param details - (Optional) Additional details.
    */
-  constructor(code: number, message: string, details: any = {}) {
+  constructor(code: number, message: string, details = {}) {
     super("error");
     this.code = code;
     this.message = message;

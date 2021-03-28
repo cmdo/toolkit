@@ -40,7 +40,7 @@ export function route(): Middleware {
         response = error;
       } else {
         res.statusCode = 500;
-        response = new HttpError(500, "Interal server error", error);
+        response = new HttpError(500, "Internal server error", error);
       }
     }
 
