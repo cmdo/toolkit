@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import type { History, Location } from "history";
+import { createBrowserHistory, History, Location } from "history";
 
 import { response } from "./Before";
 import { Query } from "./Query";
@@ -12,14 +12,6 @@ import { ValueStore } from "./ValueStore";
  | Types
  |--------------------------------------------------------------------------------
  */
-
-type Settings = {
-  /**
-   * Setting the base attribute tells the router that the app
-   * is being served from a subdirectory.
-   */
-  base?: string;
-};
 
 type Options = {
   /**
@@ -50,38 +42,53 @@ type Result = {
  */
 
 export class Router extends EventEmitter {
-  public readonly history: History;
-  public readonly base: string;
+  private base = "";
+  private history = createBrowserHistory();
 
-  public routes: Route[] = [];
+  public routes: Map<string, Route> = new Map();
+  public route?: Route;
+
   public query: Query;
   public params: ValueStore;
   public state: State;
-  public route?: Route;
+
   public unregister?: () => void;
 
-  /**
-   * Initializes a new `Router` instance.
-   *
-   * @param history  - History instance.
-   * @param settings - Router settings.
-   */
-  constructor(history: History, { base }: Settings = {}) {
+  constructor() {
     super();
-    this.base = getBase(base);
-    this.history = history;
-    this.query = new Query(history);
+    this.base = "";
+    this.history = createBrowserHistory();
+    this.query = new Query(this.history);
     this.params = new ValueStore();
     this.state = new State();
   }
 
-  /**
-   * Get the current location from the history instance.
-   *
-   * @returns history.location
-   */
   public get location(): Location {
     return this.history.location;
+  }
+
+  /**
+   * Set a new history instance.
+   *
+   * @param history - History instance.
+   *
+   * @returns Router
+   */
+  public setHistory(history: History): this {
+    this.history = history;
+    return this;
+  }
+
+  /**
+   * Set base application path.
+   *
+   * @param path - Base path.
+   *
+   * @returns Router
+   */
+  public setBase(path: string): this {
+    this.base = path === "" || path === "/" ? "" : path;
+    return this;
   }
 
   /**
@@ -93,7 +100,7 @@ export class Router extends EventEmitter {
    */
   public register(routes: Route[]) {
     for (const route of routes) {
-      this.routes.push(route.base(this.base));
+      this.routes.set(route.id, route.base(this.base));
     }
     return this;
   }
@@ -222,7 +229,7 @@ export class Router extends EventEmitter {
    * @returns Result or undefined
    */
   public get(path: string): Result | undefined {
-    for (const route of this.routes) {
+    for (const route of Array.from(this.routes.values())) {
       const match: boolean = route.match(path);
       if (match) {
         return { route, match };
@@ -238,6 +245,13 @@ export class Router extends EventEmitter {
  |--------------------------------------------------------------------------------
  */
 
+/**
+ * Creates a new MiddlewareError
+ *
+ * @classdesc
+ * Informs the client that the middleware encountered a failure event
+ * and couldn't render the requested route.
+ */
 class MiddlewareError extends Error {
   public readonly type = "MiddlewareError" as const;
 
@@ -248,6 +262,14 @@ class MiddlewareError extends Error {
     this.details = details;
   }
 }
+
+/**
+ * Creates a new NotFoundError
+ *
+ * @classdesc
+ * Informs the client that the requested location does not have a valid
+ * route assigned to it.
+ */
 class NotFoundError extends Error {
   public readonly type = "NotFoundError" as const;
 
@@ -281,21 +303,4 @@ function getParams(container: Result): ValueStore {
     index += 1;
   }
   return new ValueStore(result);
-}
-
-/**
- * Get a router base path for subdirectory support.
- *
- * @remarks
- * This mainly serves to ensure a valid base for invalid root values.
- *
- * @param path - Path to provide as base.
- *
- * @returns Base path
- */
-function getBase(path?: string): string {
-  if (!path || path === "" || path === "/") {
-    return "";
-  }
-  return path;
 }

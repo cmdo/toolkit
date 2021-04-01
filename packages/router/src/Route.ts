@@ -1,5 +1,6 @@
+import { pathToRegexp } from "path-to-regexp";
+
 import type { Before, Request } from "./Before";
-import { pathToRegexp } from "./Utils";
 
 /*
  |--------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { createMemoryHistory, Route, Router } from "..";
+import { createMemoryHistory, Route, router } from "..";
 import { Request, Response } from "../Before";
 
 /*
@@ -7,7 +7,8 @@ import { Request, Response } from "../Before";
  |--------------------------------------------------------------------------------
  */
 
-const router = new Router(createMemoryHistory(), { base: "/app" });
+router.setHistory(createMemoryHistory()).setBase("/app");
+
 const routes = [
   new Route("foo", {
     id: "foo",
@@ -60,7 +61,7 @@ describe("Router", () => {
     describe(".register()", () => {
       it("should successfully register routes", () => {
         router.register(routes);
-        expect(router.routes).toEqual(routes);
+        expect(Array.from(router.routes.values())).toEqual(routes);
       });
     });
 
