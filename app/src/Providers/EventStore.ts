@@ -1,5 +1,5 @@
-import { Event, EventStoreService, publisher } from "cmdo-domain";
 import type { BaseAttributes } from "cmdo-domain";
+import { Event, EventStoreService, publisher } from "cmdo-domain";
 
 import { container } from "../Container";
 import { api } from "../Lib/Request";
@@ -32,7 +32,7 @@ export class EventStore extends EventStoreService {
         const descriptor = collection.insertOne(event.toJSON());
         if (descriptor) {
           publisher.publish(descriptor);
-          api.post("/tenants/toolkit/events", { ...descriptor, $loki: undefined }).then(res => {
+          api.post("/tenants/toolkit/events", { ...descriptor, $loki: undefined }).then((res) => {
             switch (res.status) {
               case "error": {
                 console.log(res);

@@ -13,7 +13,7 @@
     "dev": "ts-node-dev --watch ./.yalc/cmdo-domain --transpile-only ./src/Server.ts",
     "seed": "ts-node-dev --transpile-only ./src/Seed.ts",
     "flush": "ts-node-dev --transpile-only ./src/Flush.ts",
-    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "lint": "eslint 'src/**/*.ts'",
     "test": "node --inspect node_modules/.bin/jest --runInBand --verbose"
   },
   "dependencies": {

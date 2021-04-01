@@ -4,7 +4,8 @@
   "scripts": {
     "build": "echo To be done",
     "dev": "vite",
-    "validate": "svelte-check"
+    "validate": "svelte-check",
+    "lint": "eslint 'src/**/*.ts'"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.14.0",

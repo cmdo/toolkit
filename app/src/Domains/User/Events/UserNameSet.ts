@@ -4,7 +4,7 @@ import { Event } from "cmdo-domain";
 type Attributes = BaseAttributes & {
   aggregateId: string;
   name: string;
-}
+};
 
 export class UserNameSet extends Event<Attributes> {
   public readonly type = "UserNameSet" as const;

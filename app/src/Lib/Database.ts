@@ -3,11 +3,10 @@ import Loki from "lokijs";
 import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter";
 
 import { container } from "../Container";
-import type { TenantStore } from "../Services/TenantStore";
 import type { EventDescriptor } from "../Providers/EventStore";
-import { orderByOriginId } from "../Utils/Sort";
-import { socket } from "./Socket";
+import type { TenantStore } from "../Services/TenantStore";
 import { api } from "./Request";
+import { socket } from "./Socket";
 
 /*
  |--------------------------------------------------------------------------------
@@ -21,7 +20,7 @@ type RemoteEventDescriptor = {
   tenant: string;
   event: EventDescriptor;
   version: string;
-}
+};
 
 /*
  |--------------------------------------------------------------------------------
@@ -71,7 +70,7 @@ export async function loadTenant(tenantId: string): Promise<void> {
  *
  * @param tenantId - Tenant id to delete.
  */
-export async function deleteTenant(tenantId: string) {
+export async function deleteTenant(tenantId: string): Promise<void> {
   const db = getTenant();
   if (db && db.filename === tenantId) {
     db.deleteDatabase();
@@ -121,13 +120,13 @@ async function loadTenantCollections(db: TenantStore): Promise<void> {
 
 /**
  * Handle incoming event notification.
- * 
+ *
  * @remarks
- * 
+ *
  * If the originSocketId matches the current clients socket id, and the previous
  * local id is the one we have cached locally. We skip the syncing process since
  * we now know that the next local id came right after the last known local id.
- * 
+ *
  * If the above use case is not valid then we check if the current local id is
  * younger than the next local id. If they do not match we are out of sync and
  * send another sync request to get back to parity.
@@ -148,15 +147,15 @@ function handleEvent(originSocketId: string | undefined, tenantId: string, prevL
 
 /**
  * Request un-synced events from remote replica.
- * 
+ *
  * @param tenantId - Tenant id to sync events for.
  */
 export async function sync(tenantId: string): Promise<void> {
   const timestamp = localStorage.getItem(tenantId) || "";
-  const res = await api.get<{ timestamp: string; events: RemoteEventDescriptor[]; }>(`/tenants/${tenantId}/sync?timestamp=${timestamp}`);
+  const res = await api.get<{ timestamp: string; events: RemoteEventDescriptor[] }>(`/tenants/${tenantId}/sync?timestamp=${timestamp}`);
   switch (res.status) {
     case "success": {
-      localStorage.setItem(tenantId, res.data.timestamp)
+      localStorage.setItem(tenantId, res.data.timestamp);
       for (const descriptor of res.data.events) {
         addRemoteEvent(descriptor);
       }
@@ -174,10 +173,10 @@ export async function sync(tenantId: string): Promise<void> {
  *
  * @param remote - Remote event descriptor.
  */
- function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("TenantStore")) {
+function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("TenantStore")) {
   const collection = db.getCollection<EventDescriptor>("events");
 
-  const count = collection.count({ "originId": remote.event.originId });
+  const count = collection.count({ originId: remote.event.originId });
   if (count > 0) {
     return console.log("Already have event, skipping ..."); // we already have the event ...
   }

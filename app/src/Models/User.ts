@@ -24,7 +24,7 @@ export class User extends Model<Attributes> {
     this.name = attributes.name;
     this.email = attributes.email;
     this.avatar = attributes.avatar;
-    
+
     this.createdAt = new Date(attributes.createdAt);
 
     Object.freeze(this);

@@ -1,4 +1,4 @@
-import { publisher, EventSubscriber, getUnixTimestamp } from "cmdo-domain";
+import { EventSubscriber, getUnixTimestamp, publisher } from "cmdo-domain";
 
 import { UserCreated } from "../Domains/User/Events/UserCreated";
 import { UserEmailSet } from "../Domains/User/Events/UserEmailSet";

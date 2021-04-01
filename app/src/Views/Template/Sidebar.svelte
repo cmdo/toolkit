@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from "../../Router";
+  import { router } from "cmdo-router";
 
   let current = router.route?.id;
 </script>

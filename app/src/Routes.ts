@@ -1,11 +1,8 @@
-import { createBrowserHistory, Route, Router } from "cmdo-router";
-import type { Request, Response } from "cmdo-router";
+import { Route, router } from "cmdo-router";
 
 import Dashboard from "./Views/Dashboard.svelte";
-import Events from "./Views/Events.svelte";
 import Data from "./Views/Data.svelte";
-
-const router = new Router(createBrowserHistory());
+import Events from "./Views/Events.svelte";
 
 /*
  |--------------------------------------------------------------------------------
@@ -28,7 +25,7 @@ router.register([
     title: "Data",
     id: "data",
     path: "/data"
-  }),
+  })
 ]);
 
 /*
@@ -38,13 +35,3 @@ router.register([
  */
 
 // nothing ...
-
-/*
- |--------------------------------------------------------------------------------
- | Exports
- |--------------------------------------------------------------------------------
- */
-
-export type { Request, Response };
-
-export { router };

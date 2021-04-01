@@ -5,7 +5,7 @@ type Attributes = BaseAttributes & {
   aggregateId: string;
   name: string;
   email: string;
-}
+};
 
 export class UserCreated extends Event<Attributes> {
   public readonly type = "UserCreated" as const;
