@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { sync } from "../../Lib/Database";
+  import { sync } from "../../Lib/Sync";
 
   function handleRefresh() {
-    sync("toolkit");
+    sync.refresh("toolkit")
   }
 </script>
 

@@ -4,15 +4,16 @@
   
   import Input from "../../Components/Input.svelte";
   import { container } from "../../Container";
+import type { EventDescriptor } from "../../Providers/EventStore";
   import { orderByReversedOriginId } from "../../Utils/Sort";
 
   let search = "";
   let query: any = {};
   
-  let descriptors = container.get("TenantStore").getCollection("events").find(query).sort(orderByReversedOriginId);
+  let descriptors = container.get("TenantStore").getCollection<EventDescriptor>("events").find(query).sort(orderByReversedOriginId);
   
   publisher.on("publish", () => {
-    descriptors = container.get("TenantStore").getCollection("events").find(query).sort(orderByReversedOriginId);
+    descriptors = container.get("TenantStore").getCollection<EventDescriptor>("events").find(query).sort(orderByReversedOriginId);
   });
 
   function submit() {

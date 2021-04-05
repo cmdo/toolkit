@@ -4,11 +4,12 @@ import { Event, EventStoreService, publisher } from "cmdo-domain";
 import { container } from "../Container";
 import { api } from "../Lib/Request";
 import type { TenantStore } from "../Services/TenantStore";
+import { bowser } from "../Utils/Bowser";
 import { orderByOriginId } from "../Utils/Sort";
 
 let debounce: NodeJS.Timeout;
 
-export type EventDescriptor = BaseAttributes & Record<string, unknown>;
+export type EventDescriptor = BaseAttributes & Record<string, unknown> & { version: string };
 
 /*
  |--------------------------------------------------------------------------------
@@ -18,10 +19,10 @@ export type EventDescriptor = BaseAttributes & Record<string, unknown>;
 
 export class EventStore extends EventStoreService {
   public replica(): string {
-    return "app";
+    return bowser.getBrowserName().toLowerCase();
   }
 
-  public async save(events: Event[], db = container.get("TenantStore")): Promise<void> {
+  public async save(id: string, events: Event[], expectedVersion: number, db = container.get("TenantStore")): Promise<void> {
     const collection = db.getCollection<EventDescriptor>("events");
 
     // ### Event Storage
@@ -29,7 +30,7 @@ export class EventStore extends EventStoreService {
 
     for (const event of events) {
       try {
-        const descriptor = collection.insertOne(event.toJSON());
+        const descriptor = collection.insertOne({ ...event.toJSON(), version: `${db.filename}-${id}-${++expectedVersion}` });
         if (descriptor) {
           publisher.publish(descriptor);
           api.post("/tenants/toolkit/events", { ...descriptor, $loki: undefined }).then((res) => {

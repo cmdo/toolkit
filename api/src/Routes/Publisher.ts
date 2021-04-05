@@ -5,6 +5,34 @@ import { ws } from "cmdo-socket";
 import { log } from "../Logs/Stream";
 import { EventDescriptor, mongo } from "../Services/Mongo";
 
+/*
+ |--------------------------------------------------------------------------------
+ | Version Distributor
+ |--------------------------------------------------------------------------------
+ */
+
+class AggregateVersionDistributor {
+  private aggregates: Map<string, number> = new Map();
+
+  constructor(private tenantId: string) {}
+
+  public async increment(aggregateId: string): Promise<number> {
+    let version = this.aggregates.get(aggregateId) || 0;
+    if (version === 0) {
+      version = await mongo.collection<EventDescriptor>("events").count({ tenant: this.tenantId, aggregateId });
+    }
+    version += 1;
+    this.aggregates.set(aggregateId, version);
+    return version;
+  }
+}
+
+/*
+ |--------------------------------------------------------------------------------
+ | Routes
+ |--------------------------------------------------------------------------------
+ */
+
 router.register([
   new Route({
     method: "post",
@@ -12,15 +40,16 @@ router.register([
     handler: async ({ headers: { socket }, body, params: { tenant } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
 
-      const count = await collection.count({ tenant });
-      const prevDescriptor = await collection.findOne({ tenant, version: `${tenant}-${count}` });
+      const version = new AggregateVersionDistributor(tenant);
+
+      const prevDescriptor = await collection.findOne({ tenant });
       const nextDescriptor: EventDescriptor = {
         tenant,
         event: {
           ...body,
           localId: getId("api")
         },
-        version: `${tenant}-${count + 1}`
+        version: `${tenant}-${body.aggregateId}-${await version.increment(body.aggregateId)}`
       };
 
       await collection.insertOne(nextDescriptor);
@@ -33,15 +62,44 @@ router.register([
     }
   }),
   new Route({
-    method: "get",
+    method: "post",
     path: "/tenants/:tenant/sync",
-    handler: async ({ params: { tenant }, query: { timestamp } }) => {
+    handler: async ({ params: { tenant }, body: { events, timestamp } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
 
+      const version = new AggregateVersionDistributor(tenant);
+
+      // ### Incoming Events
+
+      if (events.length > 0) {
+        const duplicates = await collection.find({ "event.originId": { $in: events.map((event: any) => event.originId) } }).toArray();
+        if (events.length - duplicates.length > 0) {
+          const dupes = new Map();
+          for (const duplicate of duplicates) {
+            dupes.set(duplicate.event.originId, true);
+          }
+
+          let descriptors = [];
+          for (const event of events.filter((event: any) => !dupes.has(event.originId))) {
+            event.localId = getId("api");
+            descriptors.push({
+              tenant,
+              event,
+              version: `${tenant}-${event.aggregateId}-${await version.increment(event.aggregateId)}`
+            });
+          }
+
+          await collection.insertMany(descriptors);
+        }
+      }
+
+      // ### Outgoing Events
+
+      events = await collection.find({ tenant }).sort({ "event.localId": 1 }).toArray();
+
       if (!timestamp) {
-        const events = await collection.find({ tenant }).sort({ "event.originId": 1 }).toArray();
         if (events.length === 0) {
-          return new HttpError(404, "Tenant has no events.");
+          return new HttpError(200, "Tenant has no events.");
         }
         return new HttpSuccess({
           timestamp: events[events.length - 1].event.localId,
@@ -49,14 +107,12 @@ router.register([
         });
       }
 
-      const events = await collection
-        .find({ tenant, "event.localId": { $gt: timestamp } })
-        .sort({ "event.originId": 1 })
-        .toArray();
-
       return new HttpSuccess({
         timestamp: events.length > 0 ? events[events.length - 1].event.localId : timestamp,
-        events
+        events: await collection
+          .find({ tenant, "event.localId": { $gt: timestamp } })
+          .sort({ "event.localId": 1 })
+          .toArray()
       });
     }
   })

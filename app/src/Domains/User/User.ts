@@ -22,11 +22,11 @@ export class User extends AggregateRoot<Event> {
     this.apply(new UserCreated(this.id, name, email));
   }
 
-  public setName(name: string) {
+  public setName(name: string): void {
     this.apply(new UserNameSet(this.id, name));
   }
 
-  public setEmail(email: string) {
+  public setEmail(email: string): void {
     this.apply(new UserEmailSet(this.id, email));
   }
 
@@ -36,7 +36,12 @@ export class User extends AggregateRoot<Event> {
    |--------------------------------------------------------------------------------
    */
 
-  public when(event: Event) {
+  public snapshot(state: Pick<User, "name" | "email">): void {
+    this.name = state.name;
+    this.email = state.email;
+  }
+
+  public when(event: Event): void {
     switch (event.type) {
       case "UserCreated": {
         this.name = event.name;
