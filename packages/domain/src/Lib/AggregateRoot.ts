@@ -66,6 +66,13 @@ export abstract class AggregateRoot<Event extends BaseEvent = BaseEvent> {
   }
 
   /**
+   * Fold aggregate snapshot onto the aggregate.
+   *
+   * @param state - Aggregate snapshot state.
+   */
+  public abstract snapshot(state: Pick<AggregateRoot, any>): void;
+
+  /**
    * Fold domain event onto the aggregate.
    *
    * @param event - Event to fold.

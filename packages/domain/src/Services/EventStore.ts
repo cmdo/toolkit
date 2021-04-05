@@ -17,14 +17,18 @@ export abstract class EventStoreService {
   /**
    * Add list of events to the event store.
    *
-   * @param events - List of events to add.
+   * @param id      - Unique primary id.
+   * @param events  - List of events to add.
+   * @param version - Current expected version.
    */
-  public abstract save(events: Event[]): Promise<void>;
+  public abstract save(id: string, events: Event[], version: number): Promise<void>;
 
   /**
    * Get list of aggregate events from the event store.
    *
    * @param aggregateId - Aggregate entity id.
+   *
+   * @returns Aggregate events.
    */
   public abstract getEventsForAggregate(aggregateId: string): Promise<Event[]>;
 
