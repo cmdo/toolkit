@@ -3,58 +3,80 @@ import { IncomingMessage, ServerResponse } from "http";
 import { router } from "..";
 import { HttpError, HttpRedirect, HttpSuccess } from "../Lib/Response";
 import { Middleware } from "../Types";
-import { applyHeaders } from "../Utils/Headers";
 
-const headers = [{ key: "Content-Type", value: "application/json" }];
+/*
+ |--------------------------------------------------------------------------------
+ | Route
+ |--------------------------------------------------------------------------------
+ */
 
 export function route(): Middleware {
   return async (req: IncomingMessage, res: ServerResponse) => {
-    let response: HttpSuccess | HttpRedirect | HttpError;
-
-    // ### Headers
-    // Apply the default response headers.
-
-    applyHeaders(headers, res);
-
-    // ### Resolve Request
-
     try {
-      response = await router.resolve(req);
-      switch (response.status) {
+      const result = await router.resolve(req);
+      switch (result.status) {
         case "success": {
-          res.statusCode = response.code();
+          handleResponse(res, result);
           break;
         }
         case "redirect": {
-          res.statusCode = response.code();
+          handleRedirect(res, result);
           break;
         }
         case "error": {
-          res.statusCode = response.code;
+          handleError(res, result);
           break;
         }
       }
     } catch (error) {
       if (error instanceof HttpError) {
-        res.statusCode = error.code;
-        response = error;
+        handleResponse(res, error);
       } else {
-        res.statusCode = 500;
-        response = new HttpError(500, "Internal server error", error);
+        handleResponse(res, new HttpError(500, "Internal server error", error));
       }
+    } finally {
+      res.end();
     }
-
-    // ### Error
-    // Console log internal server errors.
-
-    if (res.statusCode === 500) {
-      console.error(response);
-    }
-
-    // ### Respond
-    // Write to the response and end the request.
-
-    res.write(JSON.stringify(response));
-    res.end();
   };
+}
+
+/*
+ |--------------------------------------------------------------------------------
+ | Utilities
+ |--------------------------------------------------------------------------------
+ */
+
+/**
+ * Handle redirect assignments.
+ *
+ * @param res    - Server response to write redirect for.
+ * @param result - HttpRedirect instance.
+ */
+function handleRedirect(res: ServerResponse, result: HttpRedirect): void {
+  res.writeHead(result.code, { location: result.url });
+}
+
+/**
+ * Handle error assignments.
+ *
+ * @param res    - Server response to write error for.
+ * @param result - HttpError instance.
+ */
+function handleError(res: ServerResponse, result: HttpError): void {
+  if (result.code === 500) {
+    console.log(result);
+  }
+  handleResponse(res, result);
+}
+
+/**
+ * Handle routing response assignments.
+ *
+ * @param res    - Server response to write success for.
+ * @param result - HttpSuccess or HttpError instance.
+ */
+function handleResponse(res: ServerResponse, result: HttpSuccess | HttpError): void {
+  res.setHeader("Content-Type", "application/json");
+  res.statusCode = result.code;
+  res.write(JSON.stringify(result.toJSON()));
 }

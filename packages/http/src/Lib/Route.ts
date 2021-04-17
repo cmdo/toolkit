@@ -1,9 +1,35 @@
 import type { IncomingMessage } from "http";
+import { pathToRegexp } from "path-to-regexp";
 
 import type { HttpMethod } from "../Types";
-import { pathToRegexp } from "../Utils/PathToRegexp";
 import type { Policy } from "./Policy";
 import type { HttpError, HttpRedirect, HttpSuccess } from "./Response";
+
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+type Options = {
+  method: HttpMethod;
+  path: string;
+  policies?: Policy[];
+  handler: Handler;
+};
+
+type Parameter = {
+  name: string;
+  value?: string;
+};
+
+export type Handler = (req: IncomingMessage) => Promise<HttpSuccess | HttpRedirect | HttpError>;
+
+/*
+ |--------------------------------------------------------------------------------
+ | Route
+ |--------------------------------------------------------------------------------
+ */
 
 export class Route {
   public readonly method: HttpMethod;
@@ -64,23 +90,3 @@ function parseParams(path: string): Parameter[] {
     return list;
   }, []);
 }
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-type Options = {
-  method: HttpMethod;
-  path: string;
-  policies?: Policy[];
-  handler: Handler;
-};
-
-type Parameter = {
-  name: string;
-  value?: string;
-};
-
-export type Handler = (req: IncomingMessage) => Promise<HttpSuccess | HttpRedirect | HttpError>;

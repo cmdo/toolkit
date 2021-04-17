@@ -5,7 +5,44 @@ import * as policyResponse from "./Policy";
 import { HttpError, HttpRedirect, HttpSuccess } from "./Response";
 import { Route } from "./Route";
 
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+/**
+ * Http methods mapped to route lists.
+ */
+type Routes = {
+  post: Route[];
+  get: Route[];
+  put: Route[];
+  patch: Route[];
+  delete: Route[];
+};
+
+/**
+ * Result of a route search when resolving a request.
+ */
+export type Result = {
+  route: Route;
+  match: any;
+};
+
+/*
+ |--------------------------------------------------------------------------------
+ | Settings
+ |--------------------------------------------------------------------------------
+ */
+
 const resolveBody = new Set(["POST", "PUT", "PATCH"]);
+
+/*
+ |--------------------------------------------------------------------------------
+ | Router
+ |--------------------------------------------------------------------------------
+ */
 
 export class Router {
   public routes: Routes = {
@@ -177,28 +214,3 @@ export function getQuery(search = ""): any {
   }
   return result;
 }
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-/**
- * Http methods mapped to route lists.
- */
-type Routes = {
-  post: Route[];
-  get: Route[];
-  put: Route[];
-  patch: Route[];
-  delete: Route[];
-};
-
-/**
- * Result of a route search when resolving a request.
- */
-export type Result = {
-  route: Route;
-  match: any;
-};

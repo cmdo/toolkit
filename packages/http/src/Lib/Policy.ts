@@ -2,6 +2,39 @@ import type { IncomingMessage } from "http";
 
 /*
  |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+export type Policy = (this: Response, req: IncomingMessage) => Promise<Accepted | Redirect | Rejected>;
+
+type Response = {
+  accept(): Accepted;
+  redirect(url: string, type?: RedirectType): Redirect;
+  reject(code: number, message: string, data?: any): Rejected;
+};
+
+type Accepted = {
+  status: "accepted";
+};
+
+type Redirect = {
+  status: "redirect";
+  type: RedirectType;
+  url: string;
+};
+
+type Rejected = {
+  status: "rejected";
+  code: number;
+  message: string;
+  data: any;
+};
+
+export type RedirectType = "PERMANENT" | "TEMPORARY";
+
+/*
+ |--------------------------------------------------------------------------------
  | Responses
  |--------------------------------------------------------------------------------
  */
@@ -50,36 +83,3 @@ export function reject(code: number, message: string, data = {}): Rejected {
     data
   };
 }
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-export type Policy = (this: Response, req: IncomingMessage) => Promise<Accepted | Redirect | Rejected>;
-
-type Response = {
-  accept(): Accepted;
-  redirect(url: string, type?: RedirectType): Redirect;
-  reject(code: number, message: string, data?: any): Rejected;
-};
-
-type Accepted = {
-  status: "accepted";
-};
-
-type Redirect = {
-  status: "redirect";
-  type: RedirectType;
-  url: string;
-};
-
-type Rejected = {
-  status: "rejected";
-  code: number;
-  message: string;
-  data: any;
-};
-
-export type RedirectType = "PERMANENT" | "TEMPORARY";

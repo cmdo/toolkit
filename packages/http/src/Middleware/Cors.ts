@@ -10,7 +10,6 @@
 import { IncomingMessage, ServerResponse } from "http";
 
 import { Middleware } from "../Types";
-import { applyHeaders } from "../Utils/Headers";
 
 /*
  |--------------------------------------------------------------------------------
@@ -221,6 +220,24 @@ function isOriginAllowed(origin: any, allowedOrigin: any): boolean {
     return allowedOrigin.test(origin);
   }
   return !!allowedOrigin;
+}
+
+/**
+ * Apply a list of incoming headers to the server response.
+ *
+ * @param headers - List of headrs to apply.
+ * @param res     - Server response object.
+ */
+function applyHeaders(headers: any, res: ServerResponse): void {
+  for (const header of headers) {
+    if (header) {
+      if (Array.isArray(header)) {
+        applyHeaders(header, res);
+      } else if (header.value) {
+        res.setHeader(header.key, header.value);
+      }
+    }
+  }
 }
 
 /*

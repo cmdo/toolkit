@@ -41,11 +41,18 @@ export class HttpSuccess extends HttpResponse {
    *
    * @returns HTTP/S 2xx
    */
-  public code(): number {
+  public get code(): number {
     if (this.data !== undefined) {
       return 200;
     }
     return 204;
+  }
+
+  public toJSON(): Pick<HttpSuccess, "status" | "data"> {
+    return {
+      status: this.status,
+      data: this.data
+    };
   }
 }
 
@@ -65,9 +72,9 @@ export class HttpRedirect extends HttpResponse {
    * Create a new HttpRedirect instance.
    *
    * @param url  - Url to redirect the request to.
-   * @param type - (Optional) Type of redirect. Default: PERMANENT
+   * @param type - (Optional) Type of redirect. Default: TEMPORARY
    */
-  constructor(url: string, type: RedirectType = "PERMANENT") {
+  constructor(url: string, type: RedirectType = "TEMPORARY") {
     super("redirect");
     this.type = type;
     this.url = url;
@@ -78,7 +85,7 @@ export class HttpRedirect extends HttpResponse {
    *
    * @returns HTTP/S 3xx
    */
-  public code(): number {
+  public get code(): number {
     switch (this.type) {
       case "TEMPORARY": {
         return 307;
@@ -87,6 +94,14 @@ export class HttpRedirect extends HttpResponse {
         return 301;
       }
     }
+  }
+
+  public toJSON(): Pick<HttpRedirect, "status" | "type" | "url"> {
+    return {
+      status: this.status,
+      type: this.type,
+      url: this.url
+    };
   }
 }
 
@@ -115,5 +130,14 @@ export class HttpError extends HttpResponse {
     this.code = code;
     this.message = message;
     this.details = details;
+  }
+
+  public toJSON(): Pick<HttpError, "status" | "code" | "message" | "details"> {
+    return {
+      status: this.status,
+      code: this.code,
+      message: this.message,
+      details: this.details
+    };
   }
 }
