@@ -24,7 +24,11 @@
 			"rootDir": "./src",
 	
 			"allowJs": true,
-			"checkJs": true
+			"checkJs": true,
+
+			"types": [
+				"vite-plugin-pwa/client"
+			]
 		},
 		"include": ["custom.d.ts", "src/**/*"],
 		"exclude": ["node_modules/*", "__sapper__/*", "static/*"]

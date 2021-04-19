@@ -12,7 +12,7 @@
       "processor": "svelte3/svelte3"
     },
 		{
-      "files": ["*.ts", "*.cjs"],
+      "files": [".js", "*.ts", "*.cjs"],
       "parser": "@typescript-eslint/parser",
 			"extends": [
         "eslint:recommended",
