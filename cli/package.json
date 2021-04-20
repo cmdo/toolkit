@@ -1,0 +1,20 @@
+{
+  "name": "cmdo-toolkit",
+  "version": "0.0.1",
+  "description": "Command line interface for the CMDO framework.",
+  "bin": {
+    "cmdo": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "npm run compile && npm i -g",
+    "compile": "../node_modules/.bin/tsc"
+  },
+  "repository": "https://github.com/cmdo/toolkit",
+  "private": true,
+  "dependencies": {
+    "@types/inquirer": "^7.3.1",
+    "@types/node": "^14.14.37",
+    "commander": "7.2.0",
+    "inquirer": "^8.0.0"
+  }
+}
