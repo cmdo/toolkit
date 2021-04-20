@@ -11,7 +11,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "react"
   },
-  "include": ["src"]
+  "include": ["custom.d.ts", "src"]
 }

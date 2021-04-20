@@ -1,21 +1,109 @@
+import glob from "glob";
+import inquirer from "inquirer";
 import path from "path";
 
-export function isValidProject(): boolean {
-  try {
-    return getConfig() !== undefined;
-  } catch (err) {
-    return false;
+import type { CMDO } from "../types";
+
+/**
+ * Generate a list of user selectable packages to perform commands on.
+ *
+ * @param message - Choice message.
+ *
+ * @returns Selected packages.
+ */
+export async function getPackageChoices(message: string): Promise<CMDO.Package[]> {
+  const packages = await getPackages();
+  const choices = await inquirer
+    .prompt([
+      {
+        type: "checkbox",
+        name: "keys",
+        message,
+        choices: Array.from(packages.values()).map(pkg => ({
+          name: `${pkg.name} [${pkg.type}]`,
+          value: pkg.name
+        })),
+        loop: false
+      }
+    ])
+    .then(({ keys }) => keys);
+  return choices.map((entry: string) => packages.get(entry));
+}
+
+export async function getPackagesByTarget(target: string | undefined, message: string) {
+  if (!target) {
+    return getPackageChoices(message);
   }
+  const list = await getPackages(true);
+  switch (target) {
+    case "replica": {
+      return list.filter(pkg => pkg.type === "replica");
+    }
+    case "module": {
+      return list.filter(pkg => pkg.type === "module");
+    }
+    case "all": {
+      return list;
+    }
+  }
+  return list.filter(pkg => pkg.name === target);
 }
 
-export function getConfig() {
-  return getPackage().cmdo;
+/**
+ * Map all packages with cmdo details from the current location.
+ *
+ * @param toArray - Return the packages as an array.
+ *
+ * @returns Map of packages.
+ */
+export async function getPackages(toArray: true): Promise<CMDO.Package[]>;
+export async function getPackages(toArray?: false): Promise<CMDO.Packages>;
+export async function getPackages(toArray = false): Promise<CMDO.Packages | CMDO.Package[]> {
+  return new Promise<CMDO.Packages | CMDO.Package[]>((resolve, reject) => {
+    glob(
+      "**/package.json",
+      {
+        ignore: ["**/node_modules/**"]
+      },
+      (error, files) => {
+        if (error) {
+          return reject(error);
+        }
+        const packages: CMDO.Packages = new Map();
+        for (const file of files) {
+          const uri = `./${file}`;
+          try {
+            const pkg = getPackage(uri);
+            if (pkg.cmdo !== undefined) {
+              packages.set(pkg.name, {
+                type: pkg.cmdo.type,
+                name: pkg.name,
+                version: pkg.version,
+                description: pkg.description,
+                path: uri.replace("/package.json", "")
+              });
+            }
+          } catch (err) {
+            reject(err);
+          }
+        }
+        resolve(toArray ? Array.from(packages.values()) : packages);
+      }
+    );
+  });
 }
 
-function getPackage() {
+/**
+ * Get package.json content at the given uri.
+ *
+ * @param uri - URI location of the package.json to read.
+ *
+ * @returns Package.
+ */
+function getPackage(uri: string) {
   try {
-    return require(path.resolve("./package.json"));
+    return require(path.resolve(uri));
   } catch (err) {
-    throw new Error("Project Violation: Could not locate package.json in current directory.");
+    throw new Error(`Project Violation: Could resolve './${uri}'.`);
   }
 }
