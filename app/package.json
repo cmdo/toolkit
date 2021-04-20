@@ -1,10 +1,12 @@
 {
-  "name": "svelte-app",
+  "name": "app",
   "version": "1.0.0",
+  "cmdo": {
+    "type": "replica"
+  },
   "scripts": {
     "build": "echo To be done",
-    "dev": "vite",
-    "https-preview": "serve dist",
+    "dev": "vite --clearScreen false",
     "validate": "svelte-check",
     "lint": "eslint 'src/**/*.ts'"
   },

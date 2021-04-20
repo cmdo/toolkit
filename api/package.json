@@ -6,6 +6,9 @@
   "license": "UNLICENSED",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "cmdo": {
+    "type": "replica"
+  },
   "scripts": {
     "docker": "docker build -t co-server --no-cache .",
     "build": "rm -rf dist/ && tsc",

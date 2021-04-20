@@ -15,9 +15,12 @@
     "server",
     "web"
   ],
+  "cmdo": {
+    "type": "module"
+  },
   "scripts": {
-    "prepublishOnly": "yarn build",
-    "build": "yarn clean && yarn && yarn compile",
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && npm i && npm run compile",
     "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
     "compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
     "watch": "./node_modules/.bin/nodemon",
@@ -40,6 +43,6 @@
       "src/"
     ],
     "ext": "ts",
-    "exec": "yarn compile"
+    "exec": "npm run compile"
   }
 }

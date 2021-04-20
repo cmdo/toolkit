@@ -11,6 +11,9 @@
     "server",
     "socket"
   ],
+  "cmdo": {
+		"type": "module"
+	},
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "yarn clean && yarn && yarn lint && yarn compile",

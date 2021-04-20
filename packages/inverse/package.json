@@ -13,6 +13,9 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "cmdo": {
+		"type": "module"
+	},
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "yarn clean && yarn compile",

@@ -7,14 +7,7 @@
     "email": "dev@kodemon.net"
   },
   "repository": {
-    "url": "https://github.com/cmdo/toolkit.git"
-  },
-  "cmdo": {
-    "platforms": ["api", "app"]
-  },
-  "scripts": {
-    "api": "yarn --cwd ./api dev",
-    "app": "yarn --cwd ./app dev"
+    "url": "https://github.com/cmdo/toolkit"
   },
   "devDependencies": {
     "@types/jest": "26.0.22",
