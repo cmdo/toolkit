@@ -26,7 +26,15 @@ program
   .command("clean [target]")
   .description("clean up project files")
   .action(async (target?: string) => {
-    console.log(await getPackagesByTarget(target, "Which packages do you wish to clean up?"));
+    const packages = await getPackagesByTarget(target, "Which packages do you wish to clean up?");
+    for (const pkg of packages) {
+      switch (pkg.type) {
+        case "module": {
+          npm.clean(pkg.path);
+          break;
+        }
+      }
+    }
   });
 
 program

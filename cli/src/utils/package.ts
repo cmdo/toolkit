@@ -104,6 +104,6 @@ function getPackage(uri: string) {
   try {
     return require(path.resolve(uri));
   } catch (err) {
-    throw new Error(`Project Violation: Could resolve './${uri}'.`);
+    throw new Error(`Project Violation: Could not resolve '${uri}'.`);
   }
 }
