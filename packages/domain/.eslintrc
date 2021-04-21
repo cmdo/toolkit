@@ -1,14 +1,7 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "simple-import-sort"],
-  "extends": ["plugin:prettier/recommended"],
+  "extends": ["../../.eslintrc"],
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
-  },
-  "rules": {
-    "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error"
   }
 }
