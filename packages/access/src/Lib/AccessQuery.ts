@@ -5,7 +5,7 @@ export class AccessQuery {
   public readonly resources: AccessGrantsResources;
 
   /**
-   * Creates a new AccessQuery instance.
+   * Create a new AccessQuery instance.
    *
    * @param grants - Underlying grants model against which the permissions will be queried, and checked.
    */
@@ -15,14 +15,14 @@ export class AccessQuery {
   }
 
   /**
-   * Queries the underlying grant model, and checks whether the current grant
+   * Query the underlying grant model, and checks whether the current grant
    * can perform an action against the provided resource.
    *
    * @param action   - Defines the action wished to be taken.
    * @param resource - Defines the resource to perform the action against.
    * @param handler  - Optional query action handler.
    *
-   * @returns AccessPermission
+   * @returns AccessPermission.
    */
   public can<T = unknown>(action: string, resource: string, handler: AccessPermissionHandler<T> = defaultPermissionHandler): AccessPermission {
     const granted = this.resources?.[resource]?.[action];
@@ -46,7 +46,7 @@ export class AccessQuery {
  * This default fallback is used for simple resource actions with a boolean
  * value which always resolved to true.
  *
- * @returns AccessPermission
+ * @returns AccessPermission.
  */
 function defaultPermissionHandler() {
   return new AccessPermission({ granted: true });

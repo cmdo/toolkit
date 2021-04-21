@@ -9,7 +9,7 @@ export class AccessGrants {
   public operations: AccessGrantOperation[] = [];
 
   /**
-   * Creates a new AccessGrants instance.
+   * Create a new AccessGrants instance.
    *
    * @param id     - Unique persistent storage id.
    * @param acid   - Access control id to modify grants within.
@@ -22,13 +22,13 @@ export class AccessGrants {
   }
 
   /**
-   * Grants access to a specified resource action.
+   * Grant access to a specified resource action.
    *
    * @param resource - Resource to create a grant for.
    * @param action   - Action to create a grant under.
    * @param data     - (Optional) Grant data. Default: true
    *
-   * @returns AccessGrants
+   * @returns AccessGrants.
    */
   public grant(resource: string, action: string): AccessGrants;
   public grant<T = unknown>(resource: string, action: string, data: T): AccessGrants;
@@ -44,7 +44,7 @@ export class AccessGrants {
    * @param resource - Resource to deny access to.
    * @param action   - Action to deny access for.
    *
-   * @returns AccessGrants
+   * @returns AccessGrants.
    */
   public deny(resource: string, action?: string): AccessGrants {
     this.operations.push({ type: "unset", resource, action });
@@ -52,7 +52,7 @@ export class AccessGrants {
   }
 
   /**
-   * Commits the grants to the persistent storage.
+   * Commit the grants to the persistent storage.
    */
   public async commit(): Promise<void> {
     await this.store.setGrants(this.id, this.acid, this.operations);

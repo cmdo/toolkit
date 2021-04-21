@@ -12,9 +12,9 @@ export class AccessPermission {
   private readonly notate = Notation.create;
 
   /**
-   * Initialized a new instance of 'Permission'.
+   * Create a new AccessPermission instance.
    *
-   * @param response - Access response details
+   * @param response - Access response details.
    */
   constructor(response: AccessResponse) {
     this.granted = response.granted === true;
@@ -27,12 +27,12 @@ export class AccessPermission {
   }
 
   /**
-   * Filters the given data object (or array of objects) by the permission
+   * Filter the given data object (or array of objects) by the permission
    * attributes, and returns this data with allowed attributes.
    *
    * @param data - Data to filter.
    *
-   * @returns Filtered data
+   * @returns Filtered data.
    */
   public filter<T = unknown>(data: T): T;
   public filter<T = unknown>(data: T[]): T[];

@@ -8,7 +8,7 @@ export class AccessControl {
   private readonly _grants: AccessGrantsData;
 
   /**
-   * Creates a new AccessControl instance.
+   * Create a new AccessControl instance.
    *
    * @param id     - Unique persistent storage id.
    * @param grants - Access control grants.
@@ -19,49 +19,42 @@ export class AccessControl {
   }
 
   /**
-   * Returns a access control instance.
+   * Get AccessControl instance.
    *
    * @param id - Access control id.
    *
-   * @returns AccessControl
+   * @returns AccessControl.
    */
   public static async for(id: string, store = container.get("AccessStore")): Promise<AccessControl> {
     return new AccessControl(id, await store.getGrants(id));
   }
 
   /**
-   * Returns an AccessQuery instance for the provided access control id space.
-   *
-   *  1. Generate a access control query instance with provided acid group
+   * Get AccessQuery instance for the provided access control id.
    *
    * @param acid - Access control id.
    *
-   * @returns AccessQuery
+   * @returns AccessQuery.
    */
   public get(acid: string): AccessQuery {
     return new AccessQuery(this._grants[acid]);
   }
 
   /**
-   * Returns a new access grant instance for modification of access grants.
+   * Get AccessGrants instance.
    *
-   * @param acid - Access Control ID
+   * @param acid - Access control id.
    *
-   * @returns AccessGrants or AccessGrantsData
+   * @returns AccessGrants.
    */
-  public grants(): AccessGrantsData;
-  public grants(acid: string): AccessGrants;
-  public grants(acid?: string): AccessGrantsData | AccessGrants {
-    if (!acid) {
-      return this._grants;
-    }
+  public grants(acid: string): AccessGrants {
     return new AccessGrants(this._id, acid, this._grants);
   }
 
   /**
-   * Access control JSON representation.
+   * Get the acccess control grants.
    *
-   * @returns AccessGrantsData
+   * @returns AccessGrantsData.
    */
   public toJSON(): AccessGrantsData {
     return this._grants;
