@@ -7,6 +7,8 @@
 
   function submit() {
     setUserName(id, name);
+    id = "";
+    name = "";
   }
 </script>
 

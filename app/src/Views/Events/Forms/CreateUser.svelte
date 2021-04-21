@@ -7,6 +7,8 @@
 
   function submit() {
     createUser(name, email);
+    name = "";
+    email = "";
   }
 </script>
 

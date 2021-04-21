@@ -49,3 +49,5 @@ async function seed(): Promise<void> {
   await database();
   await providers();
 }
+
+seed();

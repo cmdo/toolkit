@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { container as domain } from "cmdo-events";
+  import { container as events } from "cmdo-events";
   import { router } from "cmdo-router";
   import { onMount } from "svelte";
 
@@ -17,12 +17,23 @@
   const { pathname, search, state } = router.location;
 
   onMount(async () => {
-    domain.set("EventStore", new EventStore());
+    // ### Inject Dependencies
+
+    events.set("EventStore", new EventStore());
+
+    // ### Connect Socket
+
     socket.connect();
+
+    // ### Load Tenant
 
     await loadTenant("toolkit"); // TODO load tenant conditionally
 
-    await Promise.all([import("./Subscribers")]);
+    // ### Load Event Subscribers
+
+    await Promise.all([import("./Subscribers/User")]);
+
+    // ### Start Router
 
     router.listen({
       render: async (route) => {
@@ -53,6 +64,8 @@
         }
       }
     });
+
+    // ### Inital Route
 
     router.goTo(`${pathname}${search}`, state);
   });

@@ -1,31 +1,9 @@
-import { getId } from "cmdo-domain";
+import { getId } from "cmdo-events";
 import { HttpError, HttpSuccess, Route, router } from "cmdo-http";
 import { ws } from "cmdo-socket";
 
 import { log } from "../Logs/Stream";
 import { EventDescriptor, mongo } from "../Services/Mongo";
-
-/*
- |--------------------------------------------------------------------------------
- | Version Distributor
- |--------------------------------------------------------------------------------
- */
-
-class AggregateVersionDistributor {
-  private aggregates: Map<string, number> = new Map();
-
-  constructor(private tenantId: string) {}
-
-  public async increment(aggregateId: string): Promise<number> {
-    let version = this.aggregates.get(aggregateId) || 0;
-    if (version === 0) {
-      version = await mongo.collection<EventDescriptor>("events").count({ tenant: this.tenantId, aggregateId });
-    }
-    version += 1;
-    this.aggregates.set(aggregateId, version);
-    return version;
-  }
-}
 
 /*
  |--------------------------------------------------------------------------------
@@ -36,38 +14,33 @@ class AggregateVersionDistributor {
 router.register([
   new Route({
     method: "post",
-    path: "/tenants/:tenant/events",
-    handler: async ({ headers: { socket }, body, params: { tenant } }) => {
+    path: "/streams/:stream/events",
+    handler: async ({ headers: { socket }, body, params: { stream } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
 
-      const version = new AggregateVersionDistributor(tenant);
-
-      const prevDescriptor = await collection.findOne({ tenant });
+      const prevDescriptor = await collection.findOne({ stream });
       const nextDescriptor: EventDescriptor = {
-        tenant,
+        stream,
         event: {
           ...body,
           localId: getId("api")
-        },
-        version: `${tenant}-${body.aggregateId}-${await version.increment(body.aggregateId)}`
+        }
       };
 
       await collection.insertOne(nextDescriptor);
 
       log(nextDescriptor);
 
-      ws.publish(`${tenant}:event`, socket, tenant, prevDescriptor?.event.localId, nextDescriptor.event.localId);
+      ws.publish(`${stream}:event`, socket, stream, prevDescriptor?.event.localId, nextDescriptor.event.localId);
 
       return new HttpSuccess();
     }
   }),
   new Route({
     method: "post",
-    path: "/tenants/:tenant/sync",
-    handler: async ({ params: { tenant }, body: { events, timestamp } }) => {
+    path: "/streams/:stream/sync",
+    handler: async ({ params: { stream }, body: { events, timestamp } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
-
-      const version = new AggregateVersionDistributor(tenant);
 
       // ### Incoming Events
 
@@ -79,13 +52,12 @@ router.register([
             dupes.set(duplicate.event.originId, true);
           }
 
-          let descriptors = [];
+          const descriptors = [];
           for (const event of events.filter((event: any) => !dupes.has(event.originId))) {
             event.localId = getId("api");
             descriptors.push({
-              tenant,
-              event,
-              version: `${tenant}-${event.aggregateId}-${await version.increment(event.aggregateId)}`
+              stream,
+              event
             });
           }
 
@@ -95,7 +67,7 @@ router.register([
 
       // ### Outgoing Events
 
-      events = await collection.find({ tenant }).sort({ "event.localId": 1 }).toArray();
+      events = await collection.find({ stream }).sort({ "event.localId": 1 }).toArray();
 
       if (!timestamp) {
         if (events.length === 0) {
@@ -110,7 +82,7 @@ router.register([
       return new HttpSuccess({
         timestamp: events.length > 0 ? events[events.length - 1].event.localId : timestamp,
         events: await collection
-          .find({ tenant, "event.localId": { $gt: timestamp } })
+          .find({ stream, "event.localId": { $gt: timestamp } })
           .sort({ "event.localId": 1 })
           .toArray()
       });

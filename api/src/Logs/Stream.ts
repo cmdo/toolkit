@@ -19,11 +19,7 @@ function json(obj: any, lead = 0): string {
   }
   for (const key in obj) {
     str += chalk`\n  ${spaces(lead)}{magenta.bold ${key}} ${spaces(len - key.length)} ${
-      Array.isArray(obj[key])
-        ? obj[key].join(",")
-        : typeof obj[key] === "object" && obj[key] !== null
-        ? json(obj[key], lead + 2)
-        : obj[key]
+      Array.isArray(obj[key]) ? obj[key].join(",") : typeof obj[key] === "object" && obj[key] !== null ? json(obj[key], lead + 2) : obj[key]
     }`;
   }
   return str;

@@ -43,7 +43,7 @@ export class EventStore extends EventStoreService {
       const descriptor = collection.insertOne(event.toJSON());
       if (descriptor) {
         publisher.publish(descriptor);
-        api.post("/tenants/toolkit/events", { ...descriptor, $loki: undefined }).then((res) => {
+        api.post("/streams/toolkit/events", { ...descriptor, $loki: undefined }).then((res) => {
           switch (res.status) {
             case "error": {
               console.log(res);

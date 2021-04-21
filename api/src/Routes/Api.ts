@@ -4,7 +4,7 @@ router.register([
   new Route({
     method: "get",
     path: "",
-    handler: async ({ body }) => {
+    handler: async () => {
       return new HttpSuccess({
         service: "production",
         version: "0.0.1-DEV"
