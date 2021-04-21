@@ -54,9 +54,10 @@ export function cors(options: Options = defaultOptions()): Middleware {
  */
 
 function configureOrigin(options: any, req: IncomingMessage) {
-  var requestOrigin = req.headers.origin,
-    headers = [],
-    isAllowed;
+  const requestOrigin = req.headers.origin;
+  const headers = [];
+
+  let isAllowed;
 
   if (!options.origin || options.origin === "*") {
     // allow any origin
@@ -111,7 +112,7 @@ function configureCredentials(options: any) {
 }
 
 function configureMethods(options: any) {
-  var methods = options.methods;
+  let methods = options.methods;
   if (methods.join) {
     methods = options.methods.join(","); // .methods is an array, so turn it into a string
   }
@@ -122,8 +123,8 @@ function configureMethods(options: any) {
 }
 
 function configureAllowedHeaders(options: any, req: IncomingMessage) {
-  var allowedHeaders = options.allowedHeaders || options.headers;
-  var headers = [];
+  let allowedHeaders = options.allowedHeaders || options.headers;
+  const headers = [];
 
   if (!allowedHeaders) {
     allowedHeaders = req.headers["access-control-request-headers"]; // .headers wasn't specified, so reflect the request headers
@@ -150,7 +151,7 @@ function configureAllowedHeaders(options: any, req: IncomingMessage) {
 }
 
 function configureMaxAge(options: any) {
-  var maxAge = (typeof options.maxAge === "number" || options.maxAge) && options.maxAge.toString();
+  const maxAge = (typeof options.maxAge === "number" || options.maxAge) && options.maxAge.toString();
   if (maxAge && maxAge.length) {
     return {
       key: "Access-Control-Max-Age",
@@ -161,7 +162,7 @@ function configureMaxAge(options: any) {
 }
 
 function configureExposedHeaders(options: any) {
-  var headers = options.exposedHeaders;
+  let headers = options.exposedHeaders;
 
   if (!headers) {
     return null;
@@ -208,7 +209,7 @@ function defaultOptions(): Options {
  */
 function isOriginAllowed(origin: any, allowedOrigin: any): boolean {
   if (Array.isArray(allowedOrigin)) {
-    for (var i = 0; i < allowedOrigin.length; ++i) {
+    for (let i = 0; i < allowedOrigin.length; ++i) {
       if (isOriginAllowed(origin, allowedOrigin[i])) {
         return true;
       }

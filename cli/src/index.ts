@@ -66,7 +66,7 @@ program
 program
   .command("list [type]")
   .description("list all cmdo supported packages")
-  .action(async (type?: "module" | "replica") => {
+  .action(async () => {
     const list = Array.from((await getPackages()).values());
     const table = new Table({
       borderStyle: 2,

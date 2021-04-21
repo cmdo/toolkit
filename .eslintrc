@@ -2,6 +2,10 @@
 	"root": true,
 	"plugins": ["simple-import-sort"],
 	"extends": ["eslint:recommended"],
+	"parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
 	"overrides": [
 		{
       "files": ["*.ts"],

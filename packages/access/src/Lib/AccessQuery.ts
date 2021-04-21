@@ -24,11 +24,7 @@ export class AccessQuery {
    *
    * @returns AccessPermission
    */
-  public can<T = unknown>(
-    action: string,
-    resource: string,
-    handler: AccessPermissionHandler<T> = defaultPermissionHandler
-  ): AccessPermission {
+  public can<T = unknown>(action: string, resource: string, handler: AccessPermissionHandler<T> = defaultPermissionHandler): AccessPermission {
     const granted = this.resources?.[resource]?.[action];
     if (!granted) {
       return new AccessPermission({ granted: false });

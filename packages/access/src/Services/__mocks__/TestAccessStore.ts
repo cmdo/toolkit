@@ -6,7 +6,7 @@ export const store: { [id: string]: AccessGrantsData } = {};
 
 class TestAccessStore implements AccessStore {
   public async setGrants(id: string, acid: string, operations: AccessGrantOperation[]): Promise<void> {
-    let grants = await this.getGrants(id);
+    const grants = await this.getGrants(id);
 
     for (const operation of operations) {
       switch (operation.type) {

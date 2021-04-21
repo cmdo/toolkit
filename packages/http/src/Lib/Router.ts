@@ -138,13 +138,13 @@ export class Router {
    */
   public async body(req: IncomingMessage): Promise<any> {
     return new Promise((resolve, reject) => {
-      let data: any = [];
+      const data: any = [];
 
-      req.on("data", chunk => {
+      req.on("data", (chunk) => {
         data.push(chunk);
       });
 
-      req.on("error", err => {
+      req.on("error", (err) => {
         reject(err);
       });
 

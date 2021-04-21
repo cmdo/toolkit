@@ -113,7 +113,7 @@ export class Router extends EventEmitter {
    * @returns Router
    */
   public listen(options: Options) {
-    let locations: Location[] = [];
+    const locations: Location[] = [];
 
     // ### Unregister
     // If there an existing history listener, unregister it before creating
@@ -143,7 +143,7 @@ export class Router extends EventEmitter {
 
         // ### Initial Progress
 
-        let total = route.before.length;
+        const total = route.before.length;
         if (total > 0) {
           if (total === 1) {
             this.emit("progress", 50);

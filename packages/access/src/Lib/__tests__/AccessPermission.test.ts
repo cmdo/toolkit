@@ -31,7 +31,7 @@ const permission = new AccessPermission({
 describe("AccessPermission", () => {
   it("should filter array", () => {
     expect(permission.filter(accounts)).toEqual(
-      accounts.map(account => ({
+      accounts.map((account) => ({
         name: account.name
       }))
     );

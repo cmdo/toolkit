@@ -127,8 +127,8 @@ export class SocketClient {
     if (handler) {
       handler
         .apply(this, [data, ...args])
-        .then(res => this.respond(id, res))
-        .catch(error => {
+        .then((res) => this.respond(id, res))
+        .catch((error) => {
           this.respond(id, { error });
         });
     } else {

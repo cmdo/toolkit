@@ -8,7 +8,7 @@ export const npm = {
    */
   async install(cwd: string) {
     const cursor = spawn(`npm`, ["i"], { stdio: "inherit", cwd });
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       cursor.on("close", resolve);
       cursor.on("error", reject);
     });
@@ -48,7 +48,7 @@ export const npm = {
    */
   async clean(cwd: string) {
     const cursor = spawn(`npm`, ["run", "clean"], { stdio: "inherit", cwd });
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       cursor.on("close", resolve);
       cursor.on("error", reject);
     });

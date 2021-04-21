@@ -89,7 +89,7 @@ export class Route {
    *
    * @returns Route
    */
-  public base(path: string = ""): this {
+  public base(path = ""): this {
     this.regExp = pathToRegexp(path + this.path);
     return this;
   }

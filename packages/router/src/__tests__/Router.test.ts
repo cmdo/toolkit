@@ -81,7 +81,7 @@ describe("Router", () => {
       it("should resolve a valid route", () => {
         const result = router.get("/app/foo");
         expect(result).toBeDefined();
-        expect(result!.route).toEqual(routes[0]);
+        expect(result.route).toEqual(routes[0]);
       });
 
       it("should return undefined on invalid route", () => {
@@ -92,7 +92,7 @@ describe("Router", () => {
 
   describe("Routing", () => {
     describe("middleware", () => {
-      it("should add bar to state", async done => {
+      it("should add bar to state", async (done) => {
         router.listen({
           render: async () => {
             expect(router.state.get("bar")).toEqual({ bar: "foobar" });

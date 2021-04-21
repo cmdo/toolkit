@@ -64,7 +64,7 @@ export async function runTimestampTest(i = 10, min = 0, max = 1000) {
 
   let y = 0;
   while (i--) {
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve) => {
       const timeout = Math.floor(Math.random() * (max - min + 1) + min);
       setTimeout(() => {
         const id = getId("app");
@@ -89,7 +89,7 @@ export async function runTimestampTest(i = 10, min = 0, max = 1000) {
 
   let validated = true;
   let x = 0;
-  for (let timestamp of timestamps) {
+  for (const timestamp of timestamps) {
     if (timestamp.count !== x) {
       validated = false;
       console.log(timestamp.count, "!==", x);

@@ -2,7 +2,7 @@ import glob from "glob";
 import inquirer from "inquirer";
 import path from "path";
 
-import type { CMDO } from "../types";
+import type { Package, Packages } from "../types";
 
 /**
  * Generate a list of user selectable packages to perform commands on.
@@ -11,7 +11,7 @@ import type { CMDO } from "../types";
  *
  * @returns Selected packages.
  */
-export async function getPackageChoices(message: string): Promise<CMDO.Package[]> {
+export async function getPackageChoices(message: string): Promise<Package[]> {
   const packages = await getPackages();
   const choices = await inquirer
     .prompt([
@@ -19,7 +19,7 @@ export async function getPackageChoices(message: string): Promise<CMDO.Package[]
         type: "checkbox",
         name: "keys",
         message,
-        choices: Array.from(packages.values()).map(pkg => ({
+        choices: Array.from(packages.values()).map((pkg) => ({
           name: `${pkg.name} [${pkg.type}]`,
           value: pkg.name
         })),
@@ -37,16 +37,16 @@ export async function getPackagesByTarget(target: string | undefined, message: s
   const list = await getPackages(true);
   switch (target) {
     case "replica": {
-      return list.filter(pkg => pkg.type === "replica");
+      return list.filter((pkg) => pkg.type === "replica");
     }
     case "module": {
-      return list.filter(pkg => pkg.type === "module");
+      return list.filter((pkg) => pkg.type === "module");
     }
     case "all": {
       return list;
     }
   }
-  return list.filter(pkg => pkg.name === target);
+  return list.filter((pkg) => pkg.name === target);
 }
 
 /**
@@ -56,10 +56,10 @@ export async function getPackagesByTarget(target: string | undefined, message: s
  *
  * @returns Map of packages.
  */
-export async function getPackages(toArray: true): Promise<CMDO.Package[]>;
-export async function getPackages(toArray?: false): Promise<CMDO.Packages>;
-export async function getPackages(toArray = false): Promise<CMDO.Packages | CMDO.Package[]> {
-  return new Promise<CMDO.Packages | CMDO.Package[]>((resolve, reject) => {
+export async function getPackages(toArray: true): Promise<Package[]>;
+export async function getPackages(toArray?: false): Promise<Packages>;
+export async function getPackages(toArray = false): Promise<Packages | Package[]> {
+  return new Promise<Packages | Package[]>((resolve, reject) => {
     glob(
       "**/package.json",
       {
@@ -69,7 +69,7 @@ export async function getPackages(toArray = false): Promise<CMDO.Packages | CMDO
         if (error) {
           return reject(error);
         }
-        const packages: CMDO.Packages = new Map();
+        const packages: Packages = new Map();
         for (const file of files) {
           const uri = `./${file}`;
           try {

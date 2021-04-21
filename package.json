@@ -9,6 +9,9 @@
   "repository": {
     "url": "https://github.com/cmdo/toolkit"
   },
+  "scripts": {
+    "test": "node --inspect ./node_modules/.bin/jest --runInBand --verbose"
+  },
   "devDependencies": {
     "@types/jest": "26.0.22",
     "@types/ws": "7.4.1",

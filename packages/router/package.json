@@ -14,8 +14,8 @@
   "module": "dist/esm/index.js",
   "types": "dist/cjs/index.d.ts",
   "cmdo": {
-		"type": "module"
-	},
+    "type": "module"
+  },
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "yarn clean && yarn && yarn compile",

@@ -14,14 +14,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "cmdo": {
-		"type": "module"
-	},
+    "type": "module"
+  },
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "yarn clean && yarn compile",
     "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
     "compile": "../../node_modules/.bin/tsc -b",
     "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
-    "lint": "eslint 'src/**/*.{ts,tsx}'"
+    "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   }
 }

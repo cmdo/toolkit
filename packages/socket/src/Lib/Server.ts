@@ -28,7 +28,7 @@ export class SocketServer {
    * @param target        - Port or http server.
    * @param handleConnect - On connect handler.
    */
-  public async connect<A = any, S = any>(target: number | http.Server, handleConnect: OnSocketConnection): Promise<void> {
+  public async connect(target: number | http.Server, handleConnect: OnSocketConnection): Promise<void> {
     if (typeof target === "number") {
       this.connectWithPort(target, handleConnect);
     } else {
@@ -82,7 +82,7 @@ export class SocketServer {
    * @param handleConnect - On connect handler.
    */
   private onConnect(server: WebSocket.Server, handleConnect: OnSocketConnection): void {
-    server.on("connection", socket => {
+    server.on("connection", (socket) => {
       const client = new SocketClient(socket);
 
       console.log(`socket connected ${client.id}`);

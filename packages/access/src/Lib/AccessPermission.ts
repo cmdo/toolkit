@@ -40,6 +40,6 @@ export class AccessPermission {
     if (!Array.isArray(data)) {
       return this.notate(data).filter(this.attributes).value;
     }
-    return data.map(o => this.notate(o).filter(this.attributes).value);
+    return data.map((o) => this.notate(o).filter(this.attributes).value);
   }
 }
