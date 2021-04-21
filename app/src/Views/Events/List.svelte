@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getDate, publisher } from "cmdo-domain";
+  import { getDate, publisher } from "cmdo-events";
   import { format } from "date-fns";
   
   import Input from "../../Components/Input.svelte";

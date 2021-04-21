@@ -1,16 +1,12 @@
 <script lang="ts">
+  import { setUserEmail } from "../../../Actions/User";
   import Input from "../../../Components/Input.svelte";
-  import { handle } from "../../../Domains/User/CommandHandlers";
-  import { SetUserEmail } from "../../../Domains/User/Commands/SetUserEmail";
 
   let id = "";
   let email = "";
 
   function submit() {
-    handle(new SetUserEmail(id, email))
-      .then(() => {
-        email = "";
-      }).catch(console.log);
+    setUserEmail(id, email);
   }
 </script>
 

@@ -1,4 +1,4 @@
-import { getId, publisher } from "cmdo-domain";
+import { getId, publisher } from "cmdo-events";
 
 import { container } from "../Container";
 import type { EventDescriptor } from "../Providers/EventStore";

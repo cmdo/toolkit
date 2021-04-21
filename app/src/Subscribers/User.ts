@@ -1,14 +1,14 @@
-import { EventSubscriber, getUnixTimestamp, publisher } from "cmdo-domain";
+import { EventSubscriber, getUnixTimestamp, publisher } from "cmdo-events";
 
-import { UserCreated } from "../Domains/User/Events/UserCreated";
-import { UserEmailSet } from "../Domains/User/Events/UserEmailSet";
-import { UserNameSet } from "../Domains/User/Events/UserNameSet";
+import { UserCreated } from "../Events/UserCreated";
+import { UserEmailSet } from "../Events/UserEmailSet";
+import { UserNameSet } from "../Events/UserNameSet";
 import { User } from "../Models/User";
 
 publisher.subscribe(
   new EventSubscriber(UserCreated, (event) => {
     User.create({
-      id: event.aggregateId,
+      id: event.id,
       name: event.name,
       email: event.email,
       createdAt: getUnixTimestamp(event.originId)
@@ -18,7 +18,7 @@ publisher.subscribe(
 
 publisher.subscribe(
   new EventSubscriber(UserNameSet, (event) => {
-    const user = User.findBy("id", event.aggregateId);
+    const user = User.findBy("id", event.id);
     if (user) {
       user.update({ name: event.name });
     }
@@ -27,7 +27,7 @@ publisher.subscribe(
 
 publisher.subscribe(
   new EventSubscriber(UserEmailSet, (event) => {
-    const user = User.findBy("id", event.aggregateId);
+    const user = User.findBy("id", event.id);
     if (user) {
       user.update({ email: event.email });
     }

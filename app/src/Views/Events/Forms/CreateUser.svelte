@@ -1,17 +1,12 @@
 <script lang="ts">
+  import { createUser } from "../../../Actions/User";
   import Input from "../../../Components/Input.svelte";
-  import { handle } from "../../../Domains/User/CommandHandlers";
-  import { CreateUser } from "../../../Domains/User/Commands/CreateUser";
 
   let name = "";
   let email = "";
 
   function submit() {
-    handle(new CreateUser(name, email))
-      .then(() => {
-        name = "";
-        email = "";
-      }).catch(console.log);
+    createUser(name, email);
   }
 </script>
 

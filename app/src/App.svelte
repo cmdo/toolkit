@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { container as domain } from "cmdo-domain";
+  import { container as domain } from "cmdo-events";
   import { router } from "cmdo-router";
   import { onMount } from "svelte";
 

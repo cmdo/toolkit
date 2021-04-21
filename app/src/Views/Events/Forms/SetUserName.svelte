@@ -1,16 +1,12 @@
 <script lang="ts">
+  import { setUserName } from "../../../Actions/User";
   import Input from "../../../Components/Input.svelte";
-  import { handle } from "../../../Domains/User/CommandHandlers";
-  import { SetUserName } from "../../../Domains/User/Commands/SetUserName";
 
   let id = "";
   let name = "";
 
   function submit() {
-    handle(new SetUserName(id, name))
-      .then(() => {
-        name = "";
-      }).catch(console.log);
+    setUserName(id, name);
   }
 </script>
 
