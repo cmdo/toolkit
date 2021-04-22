@@ -8,4 +8,4 @@ export type Package = {
   path: string;
 };
 
-export type Type = "replica" | "module";
+export type Type = "replica" | "module" | "shared";
