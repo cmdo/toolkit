@@ -1,0 +1,31 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared cross replica module",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "cmdo": {
+    "type": "shared"
+  },
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && npm i && npm run compile",
+    "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
+    "compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
+    "watch": "../../node_modules/.bin/nodemon",
+    "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
+    "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
+  },
+  "devDependencies": {
+    "cmdo-events": "../events"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src/"
+    ],
+    "ext": "ts",
+    "exec": "npm run compile"
+  }
+}

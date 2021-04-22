@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "rootDir": "./src",
+    "outDir": "./dist/esm"
+  },
+  "references": [{
+    "path": "../inverse/tsconfig.json"
+  }],
+  "include": ["src", "custom.d.ts"],
+  "exclude": ["src/**/__tests__/**/*", "src/**/__mocks__/**/*"]
+}
