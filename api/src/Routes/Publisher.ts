@@ -14,13 +14,13 @@ import { EventDescriptor, mongo } from "../Services/Mongo";
 router.register([
   new Route({
     method: "post",
-    path: "/streams/:stream/events",
-    handler: async ({ headers: { socket }, body, params: { stream } }) => {
+    path: "/tenants/:tenant/events",
+    handler: async ({ headers: { socket }, body, params: { tenant } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
 
-      const prevDescriptor = await collection.findOne({ stream });
+      const prevDescriptor = await collection.findOne({ tenant });
       const nextDescriptor: EventDescriptor = {
-        stream,
+        tenant,
         event: {
           ...body,
           localId: getId("api")
@@ -31,15 +31,15 @@ router.register([
 
       log(nextDescriptor);
 
-      ws.publish(`${stream}:event`, socket, stream, prevDescriptor?.event.localId, nextDescriptor.event.localId);
+      ws.publish(`${tenant}:event`, socket, tenant, prevDescriptor?.event.localId, nextDescriptor.event.localId);
 
       return new HttpSuccess();
     }
   }),
   new Route({
     method: "post",
-    path: "/streams/:stream/sync",
-    handler: async ({ params: { stream }, body: { events, timestamp } }) => {
+    path: "/tenants/:tenant/sync",
+    handler: async ({ params: { tenant }, body: { events, timestamp } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
 
       // ### Incoming Events
@@ -51,12 +51,11 @@ router.register([
           for (const duplicate of duplicates) {
             dupes.set(duplicate.event.originId, true);
           }
-
           const descriptors = [];
           for (const event of events.filter((event: any) => !dupes.has(event.originId))) {
             event.localId = getId("api");
             descriptors.push({
-              stream,
+              tenant,
               event
             });
           }
@@ -67,7 +66,7 @@ router.register([
 
       // ### Outgoing Events
 
-      events = await collection.find({ stream }).sort({ "event.localId": 1 }).toArray();
+      events = await collection.find({ tenant }).sort({ "event.localId": 1 }).toArray();
 
       if (!timestamp) {
         if (events.length === 0) {
@@ -82,7 +81,7 @@ router.register([
       return new HttpSuccess({
         timestamp: events.length > 0 ? events[events.length - 1].event.localId : timestamp,
         events: await collection
-          .find({ stream, "event.localId": { $gt: timestamp } })
+          .find({ tenant, "event.localId": { $gt: timestamp } })
           .sort({ "event.localId": 1 })
           .toArray()
       });

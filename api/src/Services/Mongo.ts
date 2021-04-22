@@ -2,7 +2,7 @@ import { config } from "../Config";
 import { Mongo } from "../Lib/Mongo";
 
 export type EventDescriptor = {
-  stream: string;
+  tenant: string;
   event: any;
 };
 

@@ -5,7 +5,7 @@
 
   import { loadTenant } from "./Lib/Database";
   import { socket } from "./Lib/Socket";
-  import { EventStore } from "./Providers/EventStore";
+  import { store } from "./Providers/EventStore";
 
   import E401 from "./Views/Errors/401.svelte";
   import E404 from "./Views/Errors/404.svelte";
@@ -19,7 +19,7 @@
   onMount(async () => {
     // ### Inject Dependencies
 
-    events.set("EventStore", new EventStore());
+    events.set("EventStore", store);
 
     // ### Connect Socket
 

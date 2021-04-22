@@ -60,7 +60,7 @@ export const sync = {
 
     // ### Send Sync Request
 
-    const res = await api.post(`/streams/${tenantId}/sync`, {
+    const res = await api.post(`/tenants/${tenantId}/sync`, {
       timestamp: localStorage.getItem(`${tenantId}.received`) || undefined,
       events
     });

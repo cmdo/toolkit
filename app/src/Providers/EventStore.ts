@@ -22,7 +22,7 @@ export type EventDescriptor = BaseAttributes & Record<string, unknown>;
  |--------------------------------------------------------------------------------
  */
 
-export class EventStore extends EventStoreService {
+export const store = new (class EventStore extends EventStoreService {
   public origin(): string {
     return bowser.getBrowserName().toLowerCase();
   }
@@ -43,7 +43,7 @@ export class EventStore extends EventStoreService {
       const descriptor = collection.insertOne(event.toJSON());
       if (descriptor) {
         publisher.publish(descriptor);
-        api.post("/streams/toolkit/events", { ...descriptor, $loki: undefined }).then((res) => {
+        api.post(`/tenants/toolkit/events`, { ...descriptor, $loki: undefined }).then((res) => {
           switch (res.status) {
             case "error": {
               console.log(res);
@@ -57,15 +57,15 @@ export class EventStore extends EventStoreService {
     saveEventStore(db);
   }
 
-  public async reduce<T extends EventReducer>(filter: LokiQuery<unknown>, reducer: T, initialState = {}, db = container.get("TenantStore")) {
+  public async reduce<T extends EventReducer>(filter: LokiQuery<any>, reducer: T, initialState = {}, db = container.get("TenantStore")): Promise<ReturnType<T>> {
     const events = db.getCollection("events").find(filter);
     console.log(events);
     if (events.length === 0) {
-      throw new Error("Reduce Violation: Query did not yield any events to reduce.");
+      throw new Error("Reducer Violation: Query did not yield any events to reduce.");
     }
     return events.reduce(reducer, initialState);
   }
-}
+})();
 
 /*
  |--------------------------------------------------------------------------------
