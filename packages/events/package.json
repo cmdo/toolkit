@@ -1,6 +1,6 @@
 {
   "name": "cmdo-events",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CMDO event store service",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
@@ -23,7 +23,7 @@
     "build": "npm run clean && npm i && npm run compile",
     "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
     "compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
-    "watch": "./node_modules/.bin/nodemon",
+    "watch": "../../node_modules/.bin/nodemon",
     "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
     "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   },
@@ -32,8 +32,7 @@
     "eventemitter3": "4.0.7"
   },
   "devDependencies": {
-    "@types/eventemitter3": "2.0.2",
-    "nodemon": "2.0.7"
+    "@types/eventemitter3": "2.0.2"
   },
   "nodemonConfig": {
     "watch": [
