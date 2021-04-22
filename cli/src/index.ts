@@ -4,6 +4,7 @@ import { Command } from "commander";
 import Table from "terminal-table";
 
 import { Package } from "./types";
+import { docker } from "./utils/docker";
 import { npm } from "./utils/npm";
 import { getPackages, getPackagesByTarget } from "./utils/package";
 
@@ -20,7 +21,7 @@ program
     const packages = await getPackagesByTarget(target, "Which packages do you wish to set up?");
     for (const pkg of packages) {
       await npm.install(pkg.path);
-      if (pkg.type === "module") {
+      if (pkg.type === "module" || pkg.type === "shared") {
         await npm.compile(pkg.path);
       }
     }
@@ -33,6 +34,7 @@ program
     const packages = await getPackagesByTarget(target, "Which packages do you wish to clean up?");
     for (const pkg of packages) {
       switch (pkg.type) {
+        case "shared":
         case "module": {
           npm.clean(pkg.path);
           break;
@@ -42,25 +44,18 @@ program
   });
 
 program
-  .command("start [target]")
-  .description("start production instances for the given projects")
-  .action(async (target?: string) => {
-    const packages = await getPackagesByTarget(target, "Which packages do you wish to start?");
-    for (const pkg of packages) {
-      switch (pkg.type) {
-        case "replica": {
-          npm.start(pkg.path);
-          break;
-        }
-      }
-    }
-  });
+  .command("dev")
+  .description("start instances for project development")
+  .action(async () => {
+    const packages = await getPackagesByTarget("all", "Which packages do you wish to start?");
 
-program
-  .command("dev [target]")
-  .description("start development instances for the given projects")
-  .action(async (target?: string) => {
-    const packages = await getPackagesByTarget(target, "Which packages do you wish to start?");
+    if (await docker.hasComposeFile()) {
+      await docker.compose.up();
+      process.on("SIGINT", function () {
+        docker.compose.down();
+      });
+    }
+
     for (const pkg of packages) {
       switch (pkg.type) {
         case "replica": {
@@ -72,6 +67,54 @@ program
           npm.watch(pkg.path);
           break;
         }
+      }
+    }
+  });
+
+program
+  .command("toolkit [target]")
+  .description("start instances for toolkit development")
+  .option("--docker", "spin up docker")
+  .action(async (target: string | undefined, options: any) => {
+    const packages = await getPackagesByTarget(target, "Which packages do you wish to start?");
+
+    if (options.docker && (await docker.hasComposeFile())) {
+      await docker.compose.up();
+      process.on("SIGINT", function () {
+        docker.compose.down();
+      });
+    }
+
+    for (const pkg of packages) {
+      switch (pkg.type) {
+        case "replica": {
+          npm.dev(pkg.path);
+          break;
+        }
+        case "module":
+        case "shared": {
+          npm.watch(pkg.path);
+          break;
+        }
+      }
+    }
+  });
+
+program
+  .command("docker [action]")
+  .description("run docker compose command")
+  .action(async (action: "up" | "down") => {
+    switch (action) {
+      case "up": {
+        await docker.compose.up();
+        break;
+      }
+      case "down": {
+        await docker.compose.down();
+        break;
+      }
+      default: {
+        console.log("Unknown docker command");
       }
     }
   });
