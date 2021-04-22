@@ -1,10 +1,6 @@
 import { container } from "cmdo-events";
 import { nanoid } from "nanoid";
-
-import { UserCreated } from "../Events/UserCreated";
-import { UserEmailSet } from "../Events/UserEmailSet";
-import { UserNameSet } from "../Events/UserNameSet";
-import { reducer } from "../Reducers/User";
+import { UserCreated, UserEmailSet, UserNameSet, userReducer } from "shared";
 
 /**
  * Create a new user.
@@ -23,7 +19,7 @@ export async function createUser(name: string, email: string, store = container.
  * @param email - Email address to set.
  */
 export async function setUserEmail(id: string, email: string, store = container.get("EventStore")): Promise<void> {
-  const state = await store.reduce({ id }, reducer);
+  const state = await store.reduce({ id }, userReducer);
   if (state.email === email) {
     return; // email is the same, lets forego this embarresment ...
   }
@@ -37,7 +33,7 @@ export async function setUserEmail(id: string, email: string, store = container.
  * @param name - Name to set.
  */
 export async function setUserName(id: string, name: string, store = container.get("EventStore")): Promise<void> {
-  const state = await store.reduce({ id }, reducer);
+  const state = await store.reduce({ id }, userReducer);
   if (state.name === name) {
     return; // mail is the same, lets forego this embarresment ...
   }

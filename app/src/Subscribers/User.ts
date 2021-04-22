@@ -1,8 +1,6 @@
 import { EventSubscriber, getUnixTimestamp, publisher } from "cmdo-events";
+import { UserCreated, UserEmailSet, UserNameSet } from "shared";
 
-import { UserCreated } from "../Events/UserCreated";
-import { UserEmailSet } from "../Events/UserEmailSet";
-import { UserNameSet } from "../Events/UserNameSet";
 import { User } from "../Models/User";
 
 publisher.subscribe(

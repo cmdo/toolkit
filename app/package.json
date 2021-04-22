@@ -13,12 +13,14 @@
   },
   "dependencies": {
     "bowser": "^2.11.0",
-    "cmdo-inverse": "^1.1.1",
-    "cmdo-router": "^2.1.0",
+    "cmdo-events": "../packages/events",
+    "cmdo-inverse": "../packages/inverse",
+    "cmdo-router": "../packages/router",
     "date-fns": "^2.21.1",
     "eventemitter3": "^4.0.7",
     "lokijs": "^1.5.11",
     "nanoid": "^3.1.22",
+    "shared": "../packages/shared",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

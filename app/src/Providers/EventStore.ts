@@ -57,8 +57,13 @@ export class EventStore extends EventStoreService {
     saveEventStore(db);
   }
 
-  public async reduce<T extends EventReducer>(filter: LokiQuery<unknown>, reducer: T, db = container.get("TenantStore")): Promise<any> {
-    return db.getCollection("events").find(filter).reduce(reducer, {});
+  public async reduce<T extends EventReducer>(filter: LokiQuery<unknown>, reducer: T, initialState = {}, db = container.get("TenantStore")) {
+    const events = db.getCollection("events").find(filter);
+    console.log(events);
+    if (events.length === 0) {
+      throw new Error("Reduce Violation: Query did not yield any events to reduce.");
+    }
+    return events.reduce(reducer, initialState);
   }
 }
 

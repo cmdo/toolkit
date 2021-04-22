@@ -2,11 +2,10 @@ import chalk from "chalk";
 
 import { EventDescriptor } from "../Services/Mongo";
 
-export function log({ tenant, event, version }: EventDescriptor): void {
+export function log({ stream, event }: EventDescriptor): void {
   console.log(chalk`\n{bgCyan.bold Event Stored}\n`);
-  console.log(chalk`{cyan.bold Tenant}     ${tenant}`);
+  console.log(chalk`{cyan.bold Tenant}     ${stream}`);
   console.log(chalk`{cyan.bold Event} ${json(event)}`);
-  console.log(chalk`{cyan.bold Version}    ${version}`);
 }
 
 function json(obj: any, lead = 0): string {
