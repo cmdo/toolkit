@@ -23,7 +23,7 @@
     "build": "npm run clean && npm i && npm run compile",
     "clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
     "compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
-    "watch": "./node_modules/.bin/nodemon",
+    "watch": "../../node_modules/.bin/nodemon",
     "test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
     "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   },
@@ -35,8 +35,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "4.0.1",
-    "@types/eventemitter3": "2.0.2",
-    "nodemon": "2.0.7"
+    "@types/eventemitter3": "2.0.2"
   },
   "nodemonConfig": {
     "watch": [

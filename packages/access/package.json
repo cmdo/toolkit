@@ -10,8 +10,9 @@
 		"security",
 		"acl"
 	],
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"main": "dist/cjs/index.js",
+	"module": "dist/esm/index.js",
+	"types": "dist/cjs/index.d.ts",
 	"cmdo": {
 		"type": "module"
 	},
@@ -19,13 +20,20 @@
 		"prepublishOnly": "npm run build",
 		"build": "npm run clean && npm i && npm run compile",
 		"clean": "rm -rf ./dist ./node_modules ./tsconfig.tsbuildinfo",
-		"compile": "../../node_modules/.bin/tsc -b",
-		"watch": "../../node_modules/.bin/tsc -w",
+		"compile": "../../node_modules/.bin/tsc -p tsconfig.json && ../../node_modules/.bin/tsc -p tsconfig-esm.json",
+		"watch": "../../node_modules/.bin/nodemon",
 		"test": "node --inspect ../../node_modules/.bin/jest --runInBand --verbose",
 		"lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
 	},
 	"dependencies": {
 		"cmdo-inverse": "1.1.1",
 		"notation": "2.0.0"
+	},
+	"nodemonConfig": {
+		"watch": [
+			"src/"
+		],
+		"ext": "ts",
+		"exec": "npm run compile"
 	}
 }
