@@ -6,7 +6,7 @@
     "cmdo": "./dist/index.js"
   },
   "scripts": {
-    "build": "npm run compile && npm update -g cmdo-cli",
+    "build": "npm run compile && npm install -g cmdo-cli --force",
     "compile": "../node_modules/.bin/tsc",
     "watch": "../node_modules/.bin/nodemon",
     "lint": "../node_modules/.bin/eslint 'src/**/*.ts'"
