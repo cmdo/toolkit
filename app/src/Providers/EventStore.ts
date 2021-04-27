@@ -5,6 +5,7 @@ import { container } from "../Container";
 import { api } from "../Lib/Request";
 import type { TenantStore } from "../Services/TenantStore";
 import { bowser } from "../Utils/Bowser";
+import { orderByOriginId } from "../Utils/Sort";
 
 let debounce: NodeJS.Timeout;
 
@@ -57,13 +58,12 @@ export const store = new (class EventStore extends EventStoreService {
     saveEventStore(db);
   }
 
-  public async reduce<T extends EventReducer>(filter: LokiQuery<any>, reducer: T, initialState = {}, db = container.get("TenantStore")): Promise<ReturnType<T>> {
-    const events = db.getCollection("events").find(filter);
-    console.log(events);
+  public async reduce<T extends EventReducer>(filter: LokiQuery<any>, reducer: T, initialState = {}, db = container.get("TenantStore")): Promise<ReturnType<T["reduce"]>> {
+    const events = db.getCollection("events").find(filter).sort(orderByOriginId);
     if (events.length === 0) {
       throw new Error("Reducer Violation: Query did not yield any events to reduce.");
     }
-    return events.reduce(reducer, initialState);
+    return events.reduce(reducer.reduce, initialState);
   }
 })();
 

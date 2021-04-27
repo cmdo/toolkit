@@ -1,8 +1,14 @@
+import { EventReducer } from "cmdo-events";
+
 import type { UserCreated } from "../Events/UserCreated";
 import type { UserEmailSet } from "../Events/UserEmailSet";
 import type { UserNameSet } from "../Events/UserNameSet";
 
-type Event = UserCreated | UserNameSet | UserEmailSet;
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
 
 type State = {
   id: string;
@@ -10,43 +16,30 @@ type State = {
   email: string;
 };
 
-const initialState = {
-  id: "",
-  name: "",
-  email: ""
-};
-
-/**
- * Event reducer for user events.
- *
- * @param state - User state.
- * @param event - User event.
- *
- * @returns State.
+/*
+ |--------------------------------------------------------------------------------
+ | Reducer
+ |--------------------------------------------------------------------------------
  */
-export function reducer(state: State = initialState, event: Event): State {
-  switch (event.type) {
-    case "UserCreated": {
-      return {
-        id: event.id,
-        name: event.name,
-        email: event.email
-      };
-    }
-    case "UserEmailSet": {
-      return {
-        ...state,
-        email: event.email
-      };
-    }
-    case "UserNameSet": {
-      return {
-        ...state,
-        name: event.name
-      };
-    }
-    default: {
-      return state;
-    }
-  }
-}
+
+export const reducer = new EventReducer<State>()
+  .set("UserCreated", function (event: UserCreated) {
+    return {
+      ...this,
+      id: event.id,
+      name: event.name,
+      email: event.email
+    };
+  })
+  .set("UserEmailSet", function (event: UserEmailSet) {
+    return {
+      ...this,
+      email: event.email
+    };
+  })
+  .set("UserNameSet", function (event: UserNameSet) {
+    return {
+      ...this,
+      name: event.name
+    };
+  });
