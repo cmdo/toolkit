@@ -1,14 +1,7 @@
 import { Token } from "cmdo-inverse";
 
 import { Event } from "../Lib/Event";
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-export type EventReducer<S = unknown, E = unknown> = (state: S, event: E) => void;
+import { EventReducer } from "../Lib/EventReducer";
 
 /*
  |--------------------------------------------------------------------------------
@@ -43,7 +36,7 @@ export abstract class EventStoreService {
    *
    * @returns State
    */
-  public abstract reduce<T extends EventReducer>(filter: unknown, reducer: T, initialState?: unknown): Promise<ReturnType<T>>;
+  public abstract reduce<T extends EventReducer>(filter: unknown, reducer: T, initialState?: unknown): Promise<ReturnType<T["reduce"]>>;
 
   /*
    |--------------------------------------------------------------------------------
