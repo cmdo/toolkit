@@ -1,5 +1,6 @@
 {
   "name": "cmdo-toolkit",
+  "version": "1.0.0",
   "description": "A collection of tools and services used to build software applications.",
   "private": true,
   "author": {
@@ -8,6 +9,9 @@
   },
   "repository": {
     "url": "https://github.com/cmdo/toolkit"
+  },
+  "cmdo": {
+    "root": true
   },
   "scripts": {
     "test": "node --inspect ./node_modules/.bin/jest --runInBand --verbose"
