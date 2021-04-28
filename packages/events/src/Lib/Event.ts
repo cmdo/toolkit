@@ -1,11 +1,5 @@
-import { getId } from "../Utils/Clock";
 import { copy } from "../Utils/Copy";
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
+import { getId } from "../Utils/Id";
 
 export type EventClass<T> = {
   new (...args: any[]): T;
@@ -16,12 +10,6 @@ export type BaseAttributes = {
   localId: string;
   originId: string;
 };
-
-/*
- |--------------------------------------------------------------------------------
- | Event
- |--------------------------------------------------------------------------------
- */
 
 export abstract class Event<Attributes extends BaseAttributes = BaseAttributes> {
   public abstract readonly type: string;
