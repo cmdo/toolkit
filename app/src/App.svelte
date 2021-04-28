@@ -5,7 +5,7 @@
 
   import { loadTenant } from "./Lib/Database";
   import { socket } from "./Lib/Socket";
-  import { store } from "./Providers/EventStore";
+  import { origin } from "./Providers/EventOrigin";
 
   import E401 from "./Views/Errors/401.svelte";
   import E404 from "./Views/Errors/404.svelte";
@@ -17,23 +17,13 @@
   const { pathname, search, state } = router.location;
 
   onMount(async () => {
-    // ### Inject Dependencies
-
-    events.set("EventStore", store);
-
-    // ### Connect Socket
+    events.set("EventOrigin", origin);
 
     socket.connect();
 
-    // ### Load Tenant
-
     await loadTenant("toolkit"); // TODO load tenant conditionally
-
-    // ### Load Event Subscribers
-
+    
     await Promise.all([import("./Subscribers/User")]);
-
-    // ### Start Router
 
     router.listen({
       render: async (route) => {
