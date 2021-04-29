@@ -15,13 +15,18 @@ type Options = {
 
 export class HLC {
   public time: typeof getTime;
+
+  public maxTime: number;
   public maxOffset: number;
+
   public timeUpperBound: number;
   public toleratedForwardClockJump: number;
+
   public last: Timestamp;
 
   constructor({ time, maxOffset = 0, timeUpperBound = 0, toleratedForwardClockJump = 0, last }: Options = {}) {
     this.time = time || getTime;
+    this.maxTime = timeUpperBound > 0 ? timeUpperBound : Number.MAX_SAFE_INTEGER;
     this.maxOffset = maxOffset;
     this.timeUpperBound = timeUpperBound;
     this.toleratedForwardClockJump = toleratedForwardClockJump;
@@ -31,66 +36,77 @@ export class HLC {
     }
   }
 
+  //#region Public Accessors
+
   public now(): Timestamp {
     return this.update(this.last);
   }
 
   public update(other: Timestamp): Timestamp {
-    const [time, logical] = this.getTimeAndLogicalValue(other);
-
-    this.validateUpperBound(time, logical);
-    this.last = new Timestamp(time, logical);
-
+    this.last = this.getTimestamp(other);
     return this.last;
   }
 
-  public getTimeAndLogicalValue(other: Timestamp): [number, number] {
+  //#endregion
+
+  //#region Clock Utilities
+
+  private getTimestamp(other: Timestamp): Timestamp {
+    const [time, logical] = this.getTimeAndLogicalValue(other);
+    if (!this.validUpperBound(time)) {
+      throw new HLC.WallTimeOverflowError(time, logical);
+    }
+    return new Timestamp(time, logical);
+  }
+
+  private getTimeAndLogicalValue(other: Timestamp): [number, number] {
     const last = Timestamp.bigger(other, this.last);
     const time = this.time();
-    if (this.getValidatedOffset(last, time) < 0) {
+    if (this.validOffset(last, time)) {
       return [time, 0];
     }
     return [last.time, last.logical + 1];
   }
 
-  public getValidatedOffset(last: Timestamp, time: number): number {
+  //#endregion
+
+  //#region clock validators
+
+  private validOffset(last: Timestamp, time: number): boolean {
     const offset = last.time - time;
-    this.validateOffset(offset);
-    return offset;
-  }
-
-  public validateOffset(offset: number) {
-    this.validateForwardClockJump(offset);
-    this.validateMaxOffset(offset);
-  }
-
-  public validateForwardClockJump(offset: number) {
-    if (this.toleratedForwardClockJump > 0 && -offset > this.toleratedForwardClockJump) {
+    if (!this.validForwardClockJump(offset)) {
       throw new HLC.ForwardJumpError(-offset, this.toleratedForwardClockJump);
     }
-  }
-
-  public validateMaxOffset(offset: number) {
-    if (this.maxOffset > 0 && offset > this.maxOffset) {
+    if (!this.validMaxOffset(offset)) {
       throw new HLC.ClockOffsetError(offset, this.maxOffset);
     }
-  }
-
-  public validateUpperBound(time: number, logical: number) {
-    const maxTime = this.timeUpperBound > 0 ? this.timeUpperBound : Number.MAX_SAFE_INTEGER;
-    if (time > maxTime) {
-      throw new HLC.WallTimeOverflowError(time, logical);
+    if (offset < 0) {
+      return true;
     }
+    return false;
   }
 
-  public toJSON() {
-    return copy.json({
-      maxOffset: this.maxOffset,
-      timeUpperBound: this.timeUpperBound,
-      toleratedForwardClockJump: this.toleratedForwardClockJump,
-      last: this.last.toJSON()
-    });
+  private validForwardClockJump(offset: number): boolean {
+    if (this.toleratedForwardClockJump > 0 && -offset > this.toleratedForwardClockJump) {
+      return false;
+    }
+    return true;
   }
+
+  private validMaxOffset(offset: number): boolean {
+    if (this.maxOffset > 0 && offset > this.maxOffset) {
+      return false;
+    }
+    return true;
+  }
+
+  private validUpperBound(time: number): boolean {
+    return time < this.maxTime;
+  }
+
+  //#endregion
+
+  //#region clock exceptions
 
   public static ForwardJumpError = class extends Error {
     public readonly type = "ForwardJumpError";
@@ -115,4 +131,15 @@ export class HLC {
       super(`The wall time ${time}ms exceeds the max time of ${maxTime}ms.`);
     }
   };
+
+  //#endregion
+
+  public toJSON() {
+    return copy.json({
+      maxOffset: this.maxOffset,
+      timeUpperBound: this.timeUpperBound,
+      toleratedForwardClockJump: this.toleratedForwardClockJump,
+      last: this.last.toJSON()
+    });
+  }
 }

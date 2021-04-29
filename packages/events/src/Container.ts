@@ -1,7 +1,7 @@
 import { Container } from "cmdo-inverse";
 
-import { EventOriginService } from "./Services/EventOrigin";
+import { EventOrigin } from "./Types/EventOrigin";
 
 export const container = new Container<{
-  EventOrigin: EventOriginService;
+  EventOrigin: EventOrigin;
 }>();
