@@ -1,6 +1,6 @@
 {
   "name": "cmdo-socket",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Simple web socket solution written for nodejs.",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <christoffer@kodemon.net>",
@@ -24,6 +24,6 @@
     "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   },
   "dependencies": {
-    "ws": "7.4.2"
+    "ws": "7.4.6"
   }
 }
