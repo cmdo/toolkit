@@ -1,7 +1,7 @@
 import { Container } from "cmdo-inverse";
 
-import type { TenantStoreToken } from "./Services/TenantStore";
+import type { TenantToken } from "./Services/Tenant";
 
 export const container = new Container<{
-  TenantStore: TenantStoreToken;
+  Tenant: TenantToken;
 }>();

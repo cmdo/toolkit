@@ -19,7 +19,7 @@ export const store = new (class EventStore {
     filter: LokiQuery<any>,
     reducer: T,
     initialState = reducer.initialState,
-    db = container.get("TenantStore")
+    db = container.get("Tenant")
   ): Promise<ReturnType<T["reduce"]>> {
     const events = db.getCollection("events").find(filter).sort(orderByOriginId);
     if (events.length === 0) {
@@ -42,7 +42,7 @@ function insertEvents(events: Event[]): void {
   }
 }
 
-function insertAndPublishEvent(event: Event, db = container.get("TenantStore")): void {
+function insertAndPublishEvent(event: Event, db = container.get("Tenant")): void {
   const descriptor = db.getCollection<EventDescriptor>("events").insertOne(event.toJSON());
   if (descriptor) {
     publishEventDescriptor(descriptor);
@@ -63,7 +63,7 @@ async function postEventDescriptor(descriptor: EventDescriptor): Promise<any> {
   });
 }
 
-function saveDatabase(db = container.get("TenantStore")): void {
+function saveDatabase(db = container.get("Tenant")): void {
   clearTimeout(debounce);
   debounce = setTimeout(() => {
     db.save();

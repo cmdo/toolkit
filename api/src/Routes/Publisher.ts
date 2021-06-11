@@ -18,7 +18,7 @@ router.register([
     handler: async ({ headers: { socket }, body, params: { tenant } }) => {
       const collection = mongo.collection<EventDescriptor>("events");
 
-      const prevDescriptor = await collection.findOne({ tenant });
+      const prevDescriptor = (await collection.find({ tenant }).limit(1).sort({ $natural: -1 }).toArray())[0];
       const nextDescriptor: EventDescriptor = {
         tenant,
         event: {

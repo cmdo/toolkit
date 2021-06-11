@@ -25,9 +25,7 @@ type ModelClass<T, A> = {
 };
 
 type Subscription<T, A> = {
-  subscribe: (
-    next: (value: T) => void
-  ) => {
+  subscribe: (next: (value: T) => void) => {
     unsubscribe(): void;
   };
   filter(query?: LokiQuery<LokiObj & A>): void;
@@ -89,7 +87,11 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Created model instance.
    */
-  public static create<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, data: A, db = container.get("TenantStore")): T {
+  public static create<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    data: A,
+    db = container.get("Tenant")
+  ): T {
     const instance = new this(db.getCollection(this.$collection).insert(data)).save();
     return instance.emit(this.$collection, { type: "insert", instance });
   }
@@ -101,7 +103,10 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns List of observed instances.
    */
-  public static observe<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, query?: LokiQuery<LokiObj & A>): Subscription<T[], A> {
+  public static observe<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query?: LokiQuery<LokiObj & A>
+  ): Subscription<T[], A> {
     let unsubscribe: () => void;
     let next: (value: T[]) => void;
     return {
@@ -133,7 +138,10 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Observed instance or undefined.
    */
-  public static observeOne<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, query?: LokiQuery<LokiObj & A>): Subscription<T | undefined, A> {
+  public static observeOne<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query?: LokiQuery<LokiObj & A>
+  ): Subscription<T | undefined, A> {
     let unsubscribe: () => void;
     let next: (value?: T) => void;
     return {
@@ -165,7 +173,11 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns List of resolved instances.
    */
-  public static find<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, query?: LokiQuery<LokiObj & A>, db = container.get("TenantStore")): T[] {
+  public static find<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query?: LokiQuery<LokiObj & A>,
+    db = container.get("Tenant")
+  ): T[] {
     return db
       .getCollection(this.$collection)
       .find(query)
@@ -179,7 +191,12 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Resolved instance or undefined.
    */
-  public static findBy<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, field: keyof A, value: any, db = container.get("TenantStore")): T | undefined {
+  public static findBy<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    field: keyof A,
+    value: any,
+    db = container.get("Tenant")
+  ): T | undefined {
     const record = db.getCollection(this.$collection).by(field, value);
     if (record) {
       return new this(record);
@@ -193,7 +210,11 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Resolve instance or undefined.
    */
-  public static findOne<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, query?: LokiQuery<LokiObj & A>, db = container.get("TenantStore")): T | undefined {
+  public static findOne<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query?: LokiQuery<LokiObj & A>,
+    db = container.get("Tenant")
+  ): T | undefined {
     const record = db.getCollection(this.$collection).findOne(query);
     if (record) {
       return new this(record);
@@ -207,7 +228,7 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Updated model.
    */
-  public update<T extends Model<A>>(this: T, data: Partial<A>, db = container.get("TenantStore")): T {
+  public update<T extends Model<A>>(this: T, data: Partial<A>, db = container.get("Tenant")): T {
     const prevRecord = db.getCollection(this.$collection).by("id", this.id);
     if (prevRecord) {
       const nextRecord = db.getCollection(this.$collection).update({ ...prevRecord, ...data });
@@ -220,7 +241,7 @@ export abstract class Model<A extends BaseAttributes> {
   /**
    * Delete the model record.
    */
-  public delete(db = container.get("TenantStore")): void {
+  public delete(db = container.get("Tenant")): void {
     const record = db.getCollection(this.$collection).by("id", this.id);
     if (record) {
       db.getCollection(this.$collection).remove(record);
@@ -277,7 +298,7 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns This
    */
-  private save(db = container.get("TenantStore")): this {
+  private save(db = container.get("Tenant")): this {
     clearTimeout(debounce);
     debounce = setTimeout(() => {
       db.save();

@@ -10,10 +10,10 @@ import type { EventDescriptor } from "../../Providers/EventStore";
   let search = "";
   let query: any = {};
   
-  let descriptors = container.get("TenantStore").getCollection<EventDescriptor>("events").find(query).sort(orderByReversedOriginId);
+  let descriptors = container.get("Tenant").getCollection<EventDescriptor>("events").find(query).sort(orderByReversedOriginId);
   
   publisher.on("publish", () => {
-    descriptors = container.get("TenantStore").getCollection<EventDescriptor>("events").find(query).sort(orderByReversedOriginId);
+    descriptors = container.get("Tenant").getCollection<EventDescriptor>("events").find(query).sort(orderByReversedOriginId);
   });
 
   function submit() {
@@ -29,7 +29,7 @@ import type { EventDescriptor } from "../../Providers/EventStore";
         });
       }
     }
-    descriptors = container.get("TenantStore").getCollection("events").find(query.$or.length > 0 ? query : {}).sort(orderByReversedOriginId);
+    descriptors = container.get("Tenant").getCollection("events").find(query.$or.length > 0 ? query : {}).sort(orderByReversedOriginId);
   }
 </script>
 

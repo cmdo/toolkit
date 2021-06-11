@@ -48,7 +48,7 @@ export const sync = {
    *
    * @param tenantId - Tenant to refresh.
    */
-  async refresh(tenantId: string, db = container.get("TenantStore")): Promise<void> {
+  async refresh(tenantId: string, db = container.get("Tenant")): Promise<void> {
     const events = db
       .getCollection("events")
       .find({ localId: { $gt: localStorage.getItem(`${tenantId}.sent`) || "" } })
@@ -127,17 +127,12 @@ function handleEvent(originSocketId: string | undefined, tenantId: string, prevL
   }
 }
 
-/**
- * Add event from remote replica.
- *
- * @param remote - Remote event descriptor.
- */
-function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("TenantStore")): string | undefined {
+function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("Tenant")): string | undefined {
   const collection = db.getCollection<EventDescriptor>("events");
 
   const count = collection.count({ originId: remote.event.originId });
   if (count > 0) {
-    console.log("Already have event, skipping ..."); // we already have the event ...
+    console.log("Remote Event Violation: Event already exists, skipping insertion.");
     return;
   }
 
@@ -149,6 +144,6 @@ function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("Tenan
     }
     return localId;
   } catch (error) {
-    console.log("Fail to hydrate incoming event", error);
+    console.log("Remote Event Violation: Failed to insert provided event", error);
   }
 }

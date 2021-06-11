@@ -11,7 +11,7 @@ import type { Collection } from "../Lib/Database";
  |
  */
 
-export declare class TenantStore extends Loki {
+export declare class Tenant extends Loki {
   // eslint-disable-next-line @typescript-eslint/ban-types
   public getCollection<F extends object = any>(collectionName: Collection): LokiConstructor.Collection<F>;
 }
@@ -22,4 +22,4 @@ export declare class TenantStore extends Loki {
  |--------------------------------------------------------------------------------
  */
 
-export type TenantStoreToken = Token<{ new (): TenantStore }, TenantStore>;
+export type TenantToken = Token<{ new (): Tenant }, Tenant>;
