@@ -19,6 +19,7 @@
     "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.0.1",
     "cmdo-events": "../events"
   },
   "nodemonConfig": {
@@ -27,5 +28,8 @@
     ],
     "ext": "ts",
     "exec": "npm run compile"
+  },
+  "dependencies": {
+    "crypto-js": "^4.0.0"
   }
 }

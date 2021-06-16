@@ -1,7 +1,8 @@
+import type { Descriptor } from "cmdo-events";
 import { getId, publisher } from "cmdo-events";
+import { events } from "shared";
 
 import { container } from "../Container";
-import type { EventDescriptor } from "../Providers/EventStore";
 import { orderByLocalId } from "../Utils/Sort";
 import { api } from "./Request";
 import { socket } from "./Socket";
@@ -14,7 +15,7 @@ import { socket } from "./Socket";
 
 type RemoteEventDescriptor = {
   tenant: string;
-  event: EventDescriptor;
+  event: Descriptor;
   version: string;
 };
 
@@ -128,7 +129,7 @@ function handleEvent(originSocketId: string | undefined, tenantId: string, prevL
 }
 
 function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("Tenant")): string | undefined {
-  const collection = db.getCollection<EventDescriptor>("events");
+  const collection = db.getCollection<Descriptor>("events");
 
   const count = collection.count({ originId: remote.event.originId });
   if (count > 0) {
@@ -140,7 +141,7 @@ function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("Tenan
     const localId = getId();
     const event = collection.insertOne({ ...remote.event, localId });
     if (event) {
-      publisher.publish(event);
+      publisher.publish(new events[event.type](event.data, event.localId, event.originId).decrypt("sample"));
     }
     return localId;
   } catch (error) {

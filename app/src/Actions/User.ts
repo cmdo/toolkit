@@ -4,21 +4,21 @@ import { UserCreated, UserEmailSet, UserNameSet, userReducer } from "shared";
 import { store } from "../Providers/EventStore";
 
 export async function createUser(name: string, email: string): Promise<void> {
-  await store.save(new UserCreated(nanoid(), name, email));
+  await store.save(new UserCreated({ id: nanoid(), name, email }));
 }
 
 export async function setUserEmail(id: string, email: string): Promise<void> {
-  const state = await store.reduce({ id }, userReducer);
+  const state = await store.reduceById(id, userReducer);
   if (state.email === email) {
     return; // email is the same, lets forego this embarresment ...
   }
-  await store.save(new UserEmailSet(id, email));
+  await store.save(new UserEmailSet({ id, email }));
 }
 
 export async function setUserName(id: string, name: string): Promise<void> {
-  const state = await store.reduce({ id }, userReducer);
+  const state = await store.reduceById(id, userReducer);
   if (state.name === name) {
     return; // mail is the same, lets forego this embarresment ...
   }
-  await store.save(new UserNameSet(id, name));
+  await store.save(new UserNameSet({ id, name }));
 }

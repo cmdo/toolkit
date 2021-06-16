@@ -1,7 +1,7 @@
-import type { BaseAttributes } from "cmdo-events";
 import { Event } from "cmdo-events";
+import { AES, enc } from "crypto-js";
 
-type Attributes = BaseAttributes & {
+type Attributes = {
   id: string;
   name: string;
   email: string;
@@ -10,15 +10,16 @@ type Attributes = BaseAttributes & {
 export class UserCreated extends Event<Attributes> {
   public readonly type = "UserCreated" as const;
 
-  constructor(public readonly id: string, public readonly name: string, public readonly email: string) {
-    super();
+  public encrypt(secret: string) {
+    return super.toJSON({
+      name: AES.encrypt(this.data.name, secret).toString(),
+      email: AES.encrypt(this.data.email, secret).toString()
+    });
   }
 
-  public toJSON() {
-    return super.toJSON({
-      id: this.id,
-      name: this.name,
-      email: this.email
-    });
+  public decrypt(secret: string) {
+    this.data.name = AES.decrypt(this.data.name, secret).toString(enc.Utf8);
+    this.data.email = AES.decrypt(this.data.email, secret).toString(enc.Utf8);
+    return this;
   }
 }

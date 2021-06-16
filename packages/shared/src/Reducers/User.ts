@@ -23,23 +23,23 @@ type State = {
  */
 
 export const reducer = new EventReducer<State>()
-  .set("UserCreated", function (event: UserCreated) {
+  .set("UserCreated", function ({ data }: UserCreated) {
     return {
       ...this,
-      id: event.id,
-      name: event.name,
-      email: event.email
+      id: data.id,
+      name: data.name,
+      email: data.email
     };
   })
-  .set("UserEmailSet", function (event: UserEmailSet) {
+  .set("UserEmailSet", function ({ data }: UserEmailSet) {
     return {
       ...this,
-      email: event.email
+      email: data.email
     };
   })
-  .set("UserNameSet", function (event: UserNameSet) {
+  .set("UserNameSet", function ({ data }: UserNameSet) {
     return {
       ...this,
-      name: event.name
+      name: data.name
     };
   });

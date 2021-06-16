@@ -4,9 +4,15 @@
  |--------------------------------------------------------------------------------
  */
 
-export { UserCreated } from "./Events/UserCreated";
-export { UserEmailSet } from "./Events/UserEmailSet";
-export { UserNameSet } from "./Events/UserNameSet";
+import { UserCreated } from "./Events/UserCreated";
+import { UserEmailSet } from "./Events/UserEmailSet";
+import { UserNameSet } from "./Events/UserNameSet";
+
+export type Event = UserCreated | UserEmailSet | UserNameSet;
+
+export const events = { UserCreated, UserEmailSet, UserNameSet };
+
+export { UserCreated, UserEmailSet, UserNameSet };
 
 /*
  |--------------------------------------------------------------------------------

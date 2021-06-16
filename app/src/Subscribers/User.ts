@@ -4,30 +4,30 @@ import { UserCreated, UserEmailSet, UserNameSet } from "shared";
 import { User } from "../Models/User";
 
 publisher.subscribe(
-  new EventSubscriber(UserCreated, (event) => {
+  new EventSubscriber(UserCreated, ({ originId, data }) => {
     User.create({
-      id: event.id,
-      name: event.name,
-      email: event.email,
-      createdAt: getUnixTimestamp(event.originId)
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      createdAt: getUnixTimestamp(originId)
     });
   })
 );
 
 publisher.subscribe(
-  new EventSubscriber(UserNameSet, (event) => {
-    const user = User.findBy("id", event.id);
+  new EventSubscriber(UserNameSet, ({ data }) => {
+    const user = User.findBy("id", data.id);
     if (user) {
-      user.update({ name: event.name });
+      user.update({ name: data.name });
     }
   })
 );
 
 publisher.subscribe(
-  new EventSubscriber(UserEmailSet, (event) => {
-    const user = User.findBy("id", event.id);
+  new EventSubscriber(UserEmailSet, ({ data }) => {
+    const user = User.findBy("id", data.id);
     if (user) {
-      user.update({ email: event.email });
+      user.update({ email: data.email });
     }
   })
 );
