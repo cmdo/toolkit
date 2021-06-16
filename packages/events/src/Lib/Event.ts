@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { copy } from "../Utils/Copy";
 import { getId } from "../Utils/Id";
 
@@ -11,17 +13,30 @@ export type BaseAttributes = {
   originId: string;
 };
 
-export abstract class Event<Attributes extends BaseAttributes = BaseAttributes> {
+export type Descriptor = BaseAttributes & { data: any };
+
+export abstract class Event<Attributes = Record<string, any>> {
   public abstract readonly type: string;
 
-  constructor(public localId = getId(), public readonly originId = localId) {}
+  constructor(public data: Attributes = {} as Attributes, public readonly localId = getId(), public readonly originId = localId) {}
 
-  public toJSON(obj = {} as any): Attributes {
+  public encrypt(secret: string): Descriptor {
+    return this.toJSON();
+  }
+
+  public decrypt(secret: string): this {
+    return this;
+  }
+
+  public toJSON(data = {}): Descriptor {
     return copy.json({
       type: this.type,
       localId: this.localId,
       originId: this.originId,
-      ...obj
+      data: {
+        ...this.data,
+        ...data
+      }
     });
   }
 }
