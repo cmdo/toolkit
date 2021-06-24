@@ -1,4 +1,4 @@
-import { router } from "cmdo-router";
+import { router } from "../Router";
 
 export const click = {
   /**

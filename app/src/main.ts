@@ -1,5 +1,5 @@
 import "./global.css";
-import "./Routes";
+import "./Router";
 
 import App from "./App.svelte";
 import { click } from "./Utils/Click";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from "cmdo-router";
+  import { router } from "../../Router";
 
   function home() {
     router.goTo("/");
