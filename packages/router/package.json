@@ -1,7 +1,7 @@
 {
   "name": "cmdo-router",
   "description": "Framework agnostic routing solution for single page web applications.",
-  "version": "2.1.0",
+  "version": "3.0.0-beta",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
   "license": "MIT",
   "repository": "https://github.com/cmdo/toolkit.git",
@@ -28,7 +28,7 @@
   "dependencies": {
     "eventemitter3": "4.0.7",
     "history": "5.0.0",
-    "path-to-regexp": "^6.2.0"
+    "path-to-regexp": "6.2.0"
   },
   "devDependencies": {
     "nodemon": "2.0.7"
@@ -38,6 +38,6 @@
       "src/"
     ],
     "ext": "ts",
-    "exec": "yarn compile"
+    "exec": "npm run compile"
   }
 }

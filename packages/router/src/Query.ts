@@ -22,7 +22,7 @@ export class Query extends ValueStore {
   public readonly history: History;
 
   /**
-   * Initializes a new `Query` instance.
+   * Create a new `Query` instance.
    *
    * @param history - History instance.
    * @param search  - Query search value.
@@ -33,7 +33,7 @@ export class Query extends ValueStore {
   }
 
   /**
-   * Updates the current query store, and triggers a history push to the
+   * Update the current query store, and triggers a history push to the
    * new location.
    *
    * @param key   - Key to update the value for.
@@ -42,26 +42,26 @@ export class Query extends ValueStore {
   public set(key: string | QueryObject, value?: string | number): void {
     if (typeof key === "string") {
       this.replace({
-        ...this.store,
+        ...this.get(),
         [key]: String(value)
       });
     } else {
       this.replace({
-        ...this.store,
+        ...this.get(),
         ...key
       });
     }
   }
 
   /**
-   * Removes provided key/value pair from the query store and triggers a
+   * Remove provided key/value pair from the query store and triggers a
    * history push to the new location.
    *
    * @param key - Key to remove from the query.
    */
   public unset(key?: string | string[]): void {
     if (key !== undefined) {
-      const current: any = { ...this.store };
+      const current: any = { ...this.get() };
       if (Array.isArray(key)) {
         for (const k of key) {
           if (current[k] !== undefined) {
@@ -94,7 +94,7 @@ export class Query extends ValueStore {
    * @returns query as a string, eg. ?foo=x&bar=y
    */
   public toString(): string {
-    return toQueryString(this.store);
+    return toQueryString(this.get());
   }
 }
 

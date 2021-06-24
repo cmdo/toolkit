@@ -1,7 +1,4 @@
-import { Router } from "./Router";
-
-export type { Before, Request, Response } from "./Before";
+export type { Action, ActionResponse, Request, Response } from "./Action";
 export { Route } from "./Route";
+export { Router } from "./Router";
 export { createBrowserHistory, createHashHistory, createMemoryHistory } from "history";
-
-export const router = new Router();

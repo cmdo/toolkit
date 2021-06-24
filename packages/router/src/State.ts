@@ -1,33 +1,36 @@
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+type Store = {
+  [key: string]: any;
+};
+
+/*
+ |--------------------------------------------------------------------------------
+ | State
+ |--------------------------------------------------------------------------------
+ */
+
 export class State {
-  private store: any;
+  private _store: Store;
 
-  /**
-   * Initializes a new State instance.
-   *
-   * @param state - State object. Default: {}
-   */
-  constructor(store?: any) {
-    this.store = store || {};
+  constructor(store: any = {}) {
+    this._store = store;
   }
 
-  /**
-   * Add additional state properties to ValueStore.
-   *
-   * @param key   - Key to store value under.
-   * @param value - Value to store under provided key.
-   */
   public set(key: string, value: any): void {
-    this.store[key] = value;
+    this._store[key] = value;
   }
 
-  /**
-   * Returns value in provided key, or the entire store.
-   *
-   * @param key - Key to return if defined.
-   *
-   * @returns Key value as provided T
-   */
-  public get<T>(key: string): T {
-    return this.store[key];
+  public get(): Store;
+  public get<T = any>(key: string): T | undefined;
+  public get<T = any>(key?: string): Store | T | undefined {
+    if (key !== undefined) {
+      return this._store[key];
+    }
+    return this._store;
   }
 }
