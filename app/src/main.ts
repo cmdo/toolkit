@@ -1,4 +1,3 @@
-import "./global.css";
 import "./Router";
 
 import App from "./App.svelte";
