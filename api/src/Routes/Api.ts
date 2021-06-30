@@ -1,14 +1,12 @@
-import { HttpSuccess, Route, router } from "cmdo-http";
+import { Route, router } from "cmdo-http";
 
 router.register([
-  new Route({
-    method: "get",
-    path: "",
-    handler: async () => {
-      return new HttpSuccess({
+  Route.get("", [
+    async function () {
+      return this.respond({
         service: "production",
         version: "0.0.1-DEV"
       });
     }
-  })
+  ])
 ]);

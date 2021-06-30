@@ -5,7 +5,7 @@ import "./Projections";
 import { container as access } from "cmdo-access";
 
 import { AccessStore } from "./Providers/AccessStore";
-import { mongo } from "./Services/Mongo";
+import { mongo } from "./Providers/Mongo";
 
 /*
  |--------------------------------------------------------------------------------

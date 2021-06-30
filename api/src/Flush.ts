@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import { mongo } from "./Services/Mongo";
+import { mongo } from "./Providers/Mongo";
 
 /*
  |--------------------------------------------------------------------------------

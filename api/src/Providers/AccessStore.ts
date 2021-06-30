@@ -1,6 +1,6 @@
 import { AccessGrantOperation, AccessGrantsData, AccessStore as AccessStoreService } from "cmdo-access";
 
-import { mongo } from "../Services/Mongo";
+import { mongo } from "./Mongo";
 
 export class AccessStore implements AccessStoreService {
   private collection = "grants";

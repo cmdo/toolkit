@@ -7,7 +7,7 @@ import { cors, route, server } from "cmdo-http";
 import { ws } from "cmdo-socket";
 
 import { AccessStore } from "./Providers/AccessStore";
-import { mongo } from "./Services/Mongo";
+import { mongo } from "./Providers/Mongo";
 
 const PORT = 8370;
 

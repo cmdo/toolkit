@@ -70,7 +70,7 @@ function publish(event: Event): void {
 }
 
 async function post(descriptor: Descriptor): Promise<any> {
-  return api.post(`/tenants/toolkit/events`, { ...descriptor, $loki: undefined }).then((res) => {
+  return api.post(`/streams/toolkit/events`, { ...descriptor, $loki: undefined }).then((res) => {
     if (res.status === "error") {
       console.log(res);
     }

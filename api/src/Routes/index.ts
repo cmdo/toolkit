@@ -1,2 +1,2 @@
 import "./Api";
-import "./Publisher";
+import "./Streams";
