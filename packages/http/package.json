@@ -1,6 +1,6 @@
 {
   "name": "cmdo-http",
-  "version": "1.0.2",
+  "version": "2.0.0-beta",
   "description": "Simple HTTP service written for node.js.",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <christoffer@kodemon.net>",

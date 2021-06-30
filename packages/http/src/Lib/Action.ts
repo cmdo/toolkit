@@ -6,22 +6,17 @@ import type { IncomingMessage } from "http";
  |--------------------------------------------------------------------------------
  */
 
-export type Policy = (this: Response, req: IncomingMessage) => Promise<Accepted | Redirect | Rejected>;
+//#region Types
 
-type Response = {
-  accept(): Accepted;
-  redirect(url: string, type?: RedirectType): Redirect;
+export type Action = (this: ActionResponse, req: IncomingMessage) => Response;
+
+export type Response = Promise<Rejected | Redirect | Accepted | Respond>;
+
+type ActionResponse = {
   reject(code: number, message: string, data?: any): Rejected;
-};
-
-type Accepted = {
-  status: "accepted";
-};
-
-type Redirect = {
-  status: "redirect";
-  type: RedirectType;
-  url: string;
+  redirect(url: string, type?: RedirectType): Redirect;
+  accept(): Accepted;
+  respond(data?: any): Respond;
 };
 
 type Rejected = {
@@ -31,7 +26,24 @@ type Rejected = {
   data: any;
 };
 
+type Redirect = {
+  status: "redirect";
+  type: RedirectType;
+  url: string;
+};
+
+type Accepted = {
+  status: "accepted";
+};
+
+type Respond = {
+  status: "respond";
+  data?: any;
+};
+
 export type RedirectType = "PERMANENT" | "TEMPORARY";
+
+//#endregion
 
 /*
  |--------------------------------------------------------------------------------
@@ -39,25 +51,8 @@ export type RedirectType = "PERMANENT" | "TEMPORARY";
  |--------------------------------------------------------------------------------
  */
 
-/**
- * Generates a policy accept response.
- *
- * @returns Accept
- */
-export function accept(): Accepted {
-  return {
-    status: "accepted"
-  };
-}
+//#region Responses
 
-/**
- * Generates a policy redirect response.
- *
- * @param url  - Redirect url.
- * @param type - (Optional) Redirect type. Default: PERMANENT
- *
- * @returns Redirect
- */
 export function redirect(url: string, type: RedirectType = "PERMANENT"): Redirect {
   return {
     status: "redirect",
@@ -66,15 +61,6 @@ export function redirect(url: string, type: RedirectType = "PERMANENT"): Redirec
   };
 }
 
-/**
- * Generates a policy reject response.
- *
- * @param code    - Http response code.
- * @param message - Message detailing the rejection.
- * @param data    - (Optional) Additional rejection data.
- *
- * @returns Reject
- */
 export function reject(code: number, message: string, data = {}): Rejected {
   return {
     status: "rejected",
@@ -83,3 +69,18 @@ export function reject(code: number, message: string, data = {}): Rejected {
     data
   };
 }
+
+export function accept(): Accepted {
+  return {
+    status: "accepted"
+  };
+}
+
+export function respond(data?: any): Respond {
+  return {
+    status: "respond",
+    data
+  };
+}
+
+//#endregion

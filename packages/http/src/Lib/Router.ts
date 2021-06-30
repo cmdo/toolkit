@@ -1,7 +1,9 @@
 import type { IncomingMessage } from "http";
 
-import { HttpMethod, RequestState } from "../Types";
-import * as policyResponse from "./Policy";
+import { HttpMethod } from "../Types";
+import * as response from "./Action";
+import { getParams } from "./Params";
+import { getQuery } from "./Query";
 import { HttpError, HttpRedirect, HttpSuccess } from "./Response";
 import { Route } from "./Route";
 
@@ -53,37 +55,39 @@ export class Router {
     delete: []
   };
 
-  /**
-   * Registers provided routes with the router.
-   *
-   * @param routes - List of routes to register with the router.
+  /*
+   |--------------------------------------------------------------------------------
+   | Setup
+   |--------------------------------------------------------------------------------
    */
+
+  //#region Setup
+
   public register(routes: Route[]) {
     for (const route of routes) {
       this.routes[route.method].push(route);
     }
   }
 
-  /**
-   * Resolve request into a http response.
-   *
-   * @param message - Incoming http message.
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Resolver
+   |--------------------------------------------------------------------------------
    */
+
+  //#region Resolver
+
   public async resolve(message: IncomingMessage): Promise<HttpSuccess | HttpRedirect | HttpError> {
     if (!message.url || !message.method) {
       return new HttpError(500, "Internal error");
     }
 
-    // ### Routes
-    // Get list of routes available for the request method.
-
     const routes = this.routes[message.method.toLowerCase() as HttpMethod];
     if (!routes) {
       return new HttpError(500, "Unsupported method type.", { method: message.method });
     }
-
-    // ### Find Route
-    // Find route in the list of available routes.
 
     const [path, search] = message.url.split("?");
     const result = this.get(routes, path);
@@ -93,41 +97,40 @@ export class Router {
 
     const route = result.route;
 
-    // ### Message State
-    // Parse the message param, query and body.
-
-    message.params = getParams(result);
-    message.query = search ? getQuery(search) : {};
+    message.params = getParams(result.route.params, result.match);
+    message.query = getQuery(search);
     message.body = resolveBody.has(message.method) ? await this.body(message) : {};
 
-    // ### Policies
-    // If policies has been defined, validate each policy before assigning
-    // and routing the request.
-
-    for (const policy of route.policies) {
-      const response = await policy.call(policyResponse, message);
-      switch (response.status) {
+    for (const action of route.actions) {
+      const result = await action.call(response, message);
+      switch (result.status) {
+        case "rejected": {
+          return new HttpError(result.code, result.message, result.data);
+        }
+        case "redirect": {
+          return new HttpRedirect(result.url, result.type);
+        }
         case "accepted": {
           continue; // policy accepted, check next policy ...
         }
-        case "redirect": {
-          return new HttpRedirect(response.url, response.type);
-        }
-        case "rejected": {
-          return new HttpError(response.code, response.message, response.data);
+        case "respond": {
+          return new HttpSuccess(result.data);
         }
       }
     }
 
-    // ### Render
-    // Execute the defined render handler.
-
-    if (route.handler) {
-      return route.handler(message);
-    }
-
     return new HttpSuccess();
   }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Utilities
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Utilities
 
   /**
    * Parse the incoming request body.
@@ -170,47 +173,6 @@ export class Router {
       }
     }
   }
-}
 
-/*
- |--------------------------------------------------------------------------------
- | Utilities
- |--------------------------------------------------------------------------------
- */
-
-/**
- * Retrieve routing parameters from the provided route result container.
- *
- * @param result - Route result.
- *
- * @returns Request parameters
- */
-export function getParams(result: Result): RequestState {
-  const routeParams = result.route.params;
-  const params: any = {};
-  let index = 1;
-  for (const routeParam of routeParams) {
-    params[routeParam.name] = result.match[index];
-    index += 1;
-  }
-  return params;
-}
-
-/**
- * Converts a search string to a object key/value pair.
- *
- * @param search - Search string to convert to object.
- */
-export function getQuery(search = ""): any {
-  const result: any = {};
-  if (search) {
-    search
-      .replace("?", "")
-      .split("&")
-      .forEach((filter: string): void => {
-        const [key, val] = filter.split(/=(.+)/);
-        result[key] = val;
-      });
-  }
-  return result;
+  //#endregion
 }

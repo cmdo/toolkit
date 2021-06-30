@@ -21,7 +21,7 @@ declare module "http" {
  |--------------------------------------------------------------------------------
  */
 
-export * from "./Lib/Policy";
+export * from "./Lib/Action";
 export * from "./Lib/Response";
 export * from "./Lib/Route";
 export * from "./Lib/Server";

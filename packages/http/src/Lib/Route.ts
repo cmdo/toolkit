@@ -1,29 +1,9 @@
-import type { IncomingMessage } from "http";
 import { pathToRegexp } from "path-to-regexp";
 
 import type { HttpMethod } from "../Types";
-import type { Policy } from "./Policy";
-import type { HttpError, HttpRedirect, HttpSuccess } from "./Response";
-
-/*
- |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-type Options = {
-  method: HttpMethod;
-  path: string;
-  policies?: Policy[];
-  handler: Handler;
-};
-
-type Parameter = {
-  name: string;
-  value?: string;
-};
-
-export type Handler = (req: IncomingMessage) => Promise<HttpSuccess | HttpRedirect | HttpError>;
+import type { Action } from "./Action";
+import type { Parameter } from "./Params";
+import { parseParams } from "./Params";
 
 /*
  |--------------------------------------------------------------------------------
@@ -31,62 +11,66 @@ export type Handler = (req: IncomingMessage) => Promise<HttpSuccess | HttpRedire
  |--------------------------------------------------------------------------------
  */
 
+//#region Route
+
 export class Route {
   public readonly method: HttpMethod;
   public readonly path: string;
   public readonly regExp: RegExp;
   public readonly params: Parameter[];
-  public readonly policies: Policy[];
-  public readonly handler: Handler;
+  public readonly actions: Action[];
 
-  /**
-   * Creates a new Route instance.
-   *
-   * @param components - Components to render when route is executed.
-   * @param options - Routing options.
-   */
-  constructor(options: Options) {
-    this.method = options.method;
-    this.path = options.path;
-    this.regExp = pathToRegexp(options.path);
-    this.params = parseParams(options.path);
-    this.policies = options.policies || [];
-    this.handler = options.handler;
+  constructor(method: HttpMethod, path: string, actions: Action[]) {
+    this.method = method;
+    this.path = path;
+    this.actions = actions;
+    this.regExp = pathToRegexp(path);
+    this.params = parseParams(path);
   }
 
-  /**
-   * Matches the route against provided path.
-   *
-   * @param path - Path to match against.
-   *
-   * @returns matched regex path with params
+  /*
+   |--------------------------------------------------------------------------------
+   | Factories
+   |--------------------------------------------------------------------------------
    */
+
+  //#region Factories
+
+  public static post(path: string, actions: Action[]): Route {
+    return new Route("post", path, actions);
+  }
+
+  public static get(path: string, actions: Action[]): Route {
+    return new Route("get", path, actions);
+  }
+
+  public static put(path: string, actions: Action[]): Route {
+    return new Route("put", path, actions);
+  }
+
+  public static patch(path: string, actions: Action[]): Route {
+    return new Route("patch", path, actions);
+  }
+
+  public static delete(path: string, actions: Action[]): Route {
+    return new Route("delete", path, actions);
+  }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Utilities
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Utilities
+
   public match(path: string): any {
     return this.regExp.exec(path);
   }
+
+  //#endregion
 }
 
-/*
- |--------------------------------------------------------------------------------
- | Utilities
- |--------------------------------------------------------------------------------
- */
-
-/**
- * Parse parameters for the provided path.
- *
- * @param path - Path to extract routing parameters from.
- *
- * @returns route parameters
- */
-function parseParams(path: string): Parameter[] {
-  return path.split("/").reduce((list: Parameter[], next: string) => {
-    if (next.match(/:/)) {
-      list.push({
-        name: next.replace(":", ""),
-        value: undefined
-      });
-    }
-    return list;
-  }, []);
-}
+//#endregion

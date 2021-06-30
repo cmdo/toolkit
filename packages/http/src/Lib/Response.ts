@@ -1,11 +1,13 @@
 import type { HttpStatus } from "../Types";
-import type { RedirectType } from "./Policy";
+import type { RedirectType } from "./Action";
 
 /*
  |--------------------------------------------------------------------------------
  | Response
  |--------------------------------------------------------------------------------
  */
+
+//#region Response
 
 abstract class HttpResponse {
   public status: HttpStatus;
@@ -15,32 +17,26 @@ abstract class HttpResponse {
   }
 }
 
+//#endregion
+
 /*
  |--------------------------------------------------------------------------------
  | Success
  |--------------------------------------------------------------------------------
  */
 
+//#region Success
+
 export class HttpSuccess extends HttpResponse {
   public readonly status = "success" as const;
 
   public data?: any;
 
-  /**
-   * Create a new HttpSuccess instance.
-   *
-   * @param data - (Optional) Data provided with the success response. Default: {}
-   */
-  constructor(data = {}) {
+  constructor(data?: any) {
     super("success");
     this.data = data;
   }
 
-  /**
-   * Retrieve the HTTP/S code for the response type.
-   *
-   * @returns HTTP/S 2xx
-   */
   public get code(): number {
     if (this.data !== undefined) {
       return 200;
@@ -56,11 +52,15 @@ export class HttpSuccess extends HttpResponse {
   }
 }
 
+//#endregion
+
 /*
  |--------------------------------------------------------------------------------
  | Redirect
  |--------------------------------------------------------------------------------
  */
+
+//#region Redirect
 
 export class HttpRedirect extends HttpResponse {
   public readonly status = "redirect" as const;
@@ -105,11 +105,15 @@ export class HttpRedirect extends HttpResponse {
   }
 }
 
+//#endregion
+
 /*
  |--------------------------------------------------------------------------------
  | Error
  |--------------------------------------------------------------------------------
  */
+
+//#region Error
 
 export class HttpError extends HttpResponse {
   public readonly status = "error" as const;
@@ -141,3 +145,5 @@ export class HttpError extends HttpResponse {
     };
   }
 }
+
+//#endregion
