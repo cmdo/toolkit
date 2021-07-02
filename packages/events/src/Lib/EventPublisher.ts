@@ -3,6 +3,14 @@ import EventEmitter from "eventemitter3";
 import type { Event } from "./Event";
 import type { EventSubscriber } from "./EventSubscriber";
 
+/*
+ |--------------------------------------------------------------------------------
+ | Event Publisher
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Event Publisher
+
 export class EventPublisher extends EventEmitter {
   public subscribe<T extends Event>(subscriber: EventSubscriber<T>) {
     this.on(subscriber.type, subscriber.handle);
@@ -18,4 +26,4 @@ export class EventPublisher extends EventEmitter {
   }
 }
 
-export const publisher = new EventPublisher();
+//#endregion

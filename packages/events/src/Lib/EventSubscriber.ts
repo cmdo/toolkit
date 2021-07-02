@@ -1,6 +1,24 @@
 import { Event, EventClass } from "./Event";
 
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Types
+
 type EventHandler<T> = (event: T) => Promise<void> | void;
+
+//#endregion
+
+/*
+ |--------------------------------------------------------------------------------
+ | Event Subscriber
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Event Subscriber
 
 export class EventSubscriber<T extends Event> {
   public readonly type: string;
@@ -11,3 +29,5 @@ export class EventSubscriber<T extends Event> {
     this.handle = handle;
   }
 }
+
+//#endregion

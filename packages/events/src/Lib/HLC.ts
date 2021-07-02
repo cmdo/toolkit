@@ -2,6 +2,14 @@ import { copy } from "../Utils/Copy";
 import { getTime } from "../Utils/Date";
 import { Timestamp } from "./Timestamp";
 
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Types
+
 type Options = {
   time?: typeof getTime;
   maxOffset?: number;
@@ -12,6 +20,16 @@ type Options = {
     logical: number;
   };
 };
+
+//#endregion
+
+/*
+ |--------------------------------------------------------------------------------
+ | Hybrid Logical Clock
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Hybrid Logical Clock
 
 export class HLC {
   public time: typeof getTime;
@@ -143,3 +161,5 @@ export class HLC {
     });
   }
 }
+
+//#endregion
