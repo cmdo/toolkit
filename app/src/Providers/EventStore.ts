@@ -9,6 +9,14 @@ import { orderByOriginId } from "../Utils/Sort";
 
 let debounce: NodeJS.Timeout;
 
+/*
+ |--------------------------------------------------------------------------------
+ | Store
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Store
+
 export const store = new (class EventStore {
   public async save(events: Event | Event[]): Promise<void> {
     insertEvents(getEventsAsArray(events));
@@ -36,6 +44,16 @@ export const store = new (class EventStore {
     return events.reduce(reducer.reduce, initialState);
   }
 })();
+
+//#endregion
+
+/*
+ |--------------------------------------------------------------------------------
+ | Utilities
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Utilities
 
 function fromEvent(descriptor: Descriptor) {
   if (!events[descriptor.type]) {
@@ -84,3 +102,5 @@ function saveDatabase(db = container.get("Tenant")): void {
     db.save();
   }, 500);
 }
+
+//#endregion

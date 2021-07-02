@@ -27,6 +27,7 @@
 			"checkJs": true,
 
 			"types": [
+				"svelte",
 				"vite-plugin-pwa/client"
 			]
 		},

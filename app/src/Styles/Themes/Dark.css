@@ -1,0 +1,10 @@
+.dark-mode {
+  --bg-color: var(--gray900);
+
+  --font-color: var(--gray50);
+
+  --link-color: var(--gray300);
+  --link-color-hover: var(--font-color);
+
+  --sidebar-border-color: var(--gray700);
+}

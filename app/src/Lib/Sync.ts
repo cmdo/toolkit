@@ -1,29 +1,20 @@
-import type { Descriptor } from "cmdo-events";
-import { getId, publisher } from "cmdo-events";
+import { getId } from "cmdo-events";
+import type { EventDescriptor } from "shared";
 import { events } from "shared";
 
 import { container } from "../Container";
+import { publisher } from "../Providers/Publisher";
 import { orderByLocalId } from "../Utils/Sort";
 import { api } from "./Request";
 import { socket } from "./Socket";
 
 /*
  |--------------------------------------------------------------------------------
- | Types
- |--------------------------------------------------------------------------------
- */
-
-type RemoteEventDescriptor = {
-  tenant: string;
-  event: Descriptor;
-  version: string;
-};
-
-/*
- |--------------------------------------------------------------------------------
  | Synchronization
  |--------------------------------------------------------------------------------
  */
+
+//#region Synchronization
 
 export const sync = {
   /**
@@ -95,11 +86,15 @@ export const sync = {
   }
 };
 
+//#endregion
+
 /*
  |--------------------------------------------------------------------------------
  | Utilities
  |--------------------------------------------------------------------------------
  */
+
+//#region Utilities
 
 /**
  * Handle incoming event notification.
@@ -128,23 +123,30 @@ function handleEvent(originSocketId: string | undefined, tenantId: string, prevL
   }
 }
 
-function addRemoteEvent(remote: RemoteEventDescriptor, db = container.get("Tenant")): string | undefined {
-  const collection = db.getCollection<Descriptor>("events");
+function addRemoteEvent(remote: EventDescriptor, db = container.get("Tenant")): string | undefined {
+  const collection = db.getCollection<EventDescriptor>("events");
 
-  const count = collection.count({ originId: remote.event.originId });
+  const count = collection.count({ "event.originId": remote.event.originId });
   if (count > 0) {
     console.log("Remote Event Violation: Event already exists, skipping insertion.");
     return;
   }
 
   try {
-    const localId = getId();
-    const event = collection.insertOne({ ...remote.event, localId });
-    if (event) {
-      publisher.publish(new events[event.type](event.data, event.localId, event.originId).decrypt("sample"));
+    const local = collection.insertOne({
+      ...remote,
+      event: {
+        ...remote.event,
+        localId: getId()
+      }
+    });
+    if (local) {
+      publisher.publish(new events[local.event.type](local.event.data, local.event.localId, local.event.originId).decrypt("sample"));
     }
-    return localId;
+    return local.event.localId;
   } catch (error) {
     console.log("Remote Event Violation: Failed to insert provided event", error);
   }
 }
+
+//#endregion

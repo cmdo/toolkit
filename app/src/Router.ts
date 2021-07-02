@@ -2,8 +2,7 @@ import type { Action } from "cmdo-router";
 import { createBrowserHistory, Route, Router } from "cmdo-router";
 
 import Dashboard from "./Views/Dashboard.svelte";
-import Data from "./Views/Data.svelte";
-import Events from "./Views/Events.svelte";
+import Docs from "./Views/Docs.svelte";
 
 export const router = new Router(createBrowserHistory());
 
@@ -13,11 +12,11 @@ export const router = new Router(createBrowserHistory());
  |--------------------------------------------------------------------------------
  */
 
-router.register([
-  new Route("/", [setTitle("Dashboard"), render(Dashboard)]),
-  new Route("/events", [setTitle("Events"), render(Events)]),
-  new Route("/data", [setTitle("Data"), render(Data)])
-]);
+//#region Routes
+
+router.register([new Route("/", [setTitle("Dashboard"), render(Dashboard)]), new Route("/docs", [setTitle("Docs"), render(Docs)])]);
+
+//#endregion
 
 /*
  |--------------------------------------------------------------------------------
@@ -25,11 +24,7 @@ router.register([
  |--------------------------------------------------------------------------------
  */
 
-function render(component: any): Action {
-  return async function () {
-    return this.render([component]);
-  };
-}
+//#region Actions
 
 function setTitle(title: string): Action {
   return async function () {
@@ -38,12 +33,24 @@ function setTitle(title: string): Action {
   };
 }
 
+function render(component: any): Action {
+  return async function () {
+    return this.render([component]);
+  };
+}
+
+//#endregion
+
 /*
  |--------------------------------------------------------------------------------
  | Utilities
  |--------------------------------------------------------------------------------
  */
 
+//#region Utilities
+
 export function getTitle(): string {
   return document.title;
 }
+
+//#endregion

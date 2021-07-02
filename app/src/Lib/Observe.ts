@@ -1,6 +1,6 @@
 import { match } from "../Utils/Match";
-import type { Action, BaseAttributes } from "./Model";
-import { events, Model } from "./Model";
+import { events } from "./Events";
+import type { Action, BaseAttributes, Model } from "./Model";
 
 class ObserverCache extends Map<string, true> {}
 
@@ -13,7 +13,11 @@ class ObserverCache extends Map<string, true> {}
  *
  * @returns Destructor method.
  */
-export function observe<A extends BaseAttributes, T extends Model<any>>(model: any, query: LokiQuery<LokiObj & A> | undefined, cb: (instances: T[]) => void): () => void {
+export function observe<A extends BaseAttributes, T extends Model<any>>(
+  model: any,
+  query: LokiQuery<LokiObj & A> | undefined,
+  cb: (instances: T[]) => void
+): () => void {
   const cache = new ObserverCache();
 
   // ### Query
@@ -109,14 +113,14 @@ export function observe<A extends BaseAttributes, T extends Model<any>>(model: a
   // ### Start Listener
   // Start listening for collection changes.
 
-  events.addListener(model.$collection, handleChange);
+  events.model.addListener(model.$collection, handleChange);
 
   // ### Return Destructor
   // Return subscription destructor to clean up event listeners when
   // components are destroyed.
 
   return () => {
-    events.removeListener(model.$collection, handleChange);
+    events.model.removeListener(model.$collection, handleChange);
   };
 }
 
@@ -188,13 +192,13 @@ export function observeOne<A extends BaseAttributes, T extends Model<any>>(
   // ### Start Listener
   // Start listening for collection changes.
 
-  events.addListener(model.$collection, handleChange);
+  events.model.addListener(model.$collection, handleChange);
 
   // ### Return Destructor
   // Return subscription destructor to clean up event listeners when
   // components are destroyed.
 
   return () => {
-    events.removeListener(model.$collection, handleChange);
+    events.model.removeListener(model.$collection, handleChange);
   };
 }

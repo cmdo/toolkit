@@ -1,1 +1,9 @@
+@import "./Variables.css";
 @import "./Normalize.css";
+@import "./Themes/Dark.css";
+
+body {
+  background-color: var(--bg-color);
+  color: var(--font-color);
+  font-family: var(--fontSet-latin), sans-serif;
+}

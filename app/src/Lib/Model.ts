@@ -1,13 +1,9 @@
-import EventEmitter from "eventemitter3";
-
-import { container } from "../Container";
 import { copy } from "../Utils/Copy";
-import type { Collection } from "./Database";
+import type { Collection } from "./Database/Collections";
+import { getCollection } from "./Database/Utils";
+import { events } from "./Events";
 import { observe, observeOne } from "./Observe";
-
-export const events = new EventEmitter();
-
-let debounce: NodeJS.Timeout;
+import { getStreamId } from "./Stream";
 
 /*
  |--------------------------------------------------------------------------------
@@ -22,6 +18,7 @@ export type BaseAttributes = {
 type ModelClass<T, A> = {
   new (attributes: A): T;
   $collection: Collection;
+  collection: LokiConstructor.Collection;
 };
 
 type Subscription<T, A> = {
@@ -56,68 +53,74 @@ export abstract class Model<A extends BaseAttributes> {
 
   public readonly id: string;
 
-  /**
-   * Create a new Model instance.
-   *
-   * @param attributes - Attributes data.
-   */
   constructor(attributes: BaseAttributes) {
     this.id = attributes.id;
   }
 
-  /**
-   * Collection the model belongs to.
-   *
-   * @returns Collection
-   */
   public get $collection(): Collection {
     return (this as any).constructor.$collection;
   }
 
-  /*
-   |--------------------------------------------------------------------------------
-   | Utilities
-   |--------------------------------------------------------------------------------
-   */
-
-  /**
-   * Create a new record for the given model.
-   *
-   * @param data - Attribute data to insert in the collection.
-   *
-   * @returns Created model instance.
-   */
-  public static create<A extends BaseAttributes, T extends Model<A>>(
-    this: ModelClass<T, A>,
-    data: A,
-    db = container.get("Tenant")
-  ): T {
-    const instance = new this(db.getCollection(this.$collection).insert(data)).save();
-    return instance.emit(this.$collection, { type: "insert", instance });
+  public static get collection(): LokiConstructor.Collection {
+    return getCollection(getStreamId(), this.$collection);
   }
 
-  /**
-   * Retrieve a list of observed records.
-   *
-   * @param query - Attribute data to insert in the collection. Default: undefined
-   *
-   * @returns List of observed instances.
+  public get collection(): LokiConstructor.Collection {
+    return getCollection(getStreamId(), this.$collection);
+  }
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Factories
+   |--------------------------------------------------------------------------------
    */
+
+  public static create<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, data: A): T {
+    return new this(this.collection.insert(data)).save("insert");
+  }
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Observers
+   |--------------------------------------------------------------------------------
+   */
+
+  public static observe<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>): Subscription<T[], A>;
   public static observe<A extends BaseAttributes, T extends Model<A>>(
     this: ModelClass<T, A>,
-    query?: LokiQuery<LokiObj & A>
+    sortFn: (a: T, b: T) => number
+  ): Subscription<T[], A>;
+  public static observe<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query: LokiQuery<LokiObj & A>
+  ): Subscription<T[], A>;
+  public static observe<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query: LokiQuery<LokiObj & A>,
+    sortFn: (a: T, b: T) => number
+  ): Subscription<T[], A>;
+  public static observe<A extends BaseAttributes, T extends Model<A>>(
+    this: ModelClass<T, A>,
+    query?: LokiQuery<LokiObj & A>,
+    sortFn?: (a: T, b: T) => number
   ): Subscription<T[], A> {
     let unsubscribe: () => void;
     let next: (value: T[]) => void;
+
+    if (typeof query === "function") {
+      sortFn = query;
+      query = undefined;
+    }
+
     return {
       subscribe: (_next: (value: T[]) => void) => {
         next = _next;
         unsubscribe = observe(this, query, (instances: T[]) => {
-          next(instances);
+          next(sortFn ? instances.sort(sortFn) : instances);
         });
         return {
           unsubscribe() {
-            console.log("Unsubscribe observe");
+            // console.log("Unsubscribe observe"); // muting this.
             unsubscribe();
           }
         };
@@ -125,19 +128,12 @@ export abstract class Model<A extends BaseAttributes> {
       filter: (query) => {
         unsubscribe();
         unsubscribe = observe(this, query, (instances: T[]) => {
-          next(instances);
+          next(sortFn ? instances.sort(sortFn) : instances);
         });
       }
     };
   }
 
-  /**
-   * Retrieve a single observed record.
-   *
-   * @param query - Attribute data to insert in the collection. Default: undefined
-   *
-   * @returns Observed instance or undefined.
-   */
   public static observeOne<A extends BaseAttributes, T extends Model<A>>(
     this: ModelClass<T, A>,
     query?: LokiQuery<LokiObj & A>
@@ -152,7 +148,7 @@ export abstract class Model<A extends BaseAttributes> {
         });
         return {
           unsubscribe() {
-            console.log("Unsubscribe observeOne");
+            // console.log("Unsubscribe observeOne"); // muting this.
             unsubscribe();
           }
         };
@@ -166,6 +162,12 @@ export abstract class Model<A extends BaseAttributes> {
     };
   }
 
+  /*
+   |--------------------------------------------------------------------------------
+   | Readers
+   |--------------------------------------------------------------------------------
+   */
+
   /**
    * Retrieve a list of database records.
    *
@@ -173,15 +175,8 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns List of resolved instances.
    */
-  public static find<A extends BaseAttributes, T extends Model<A>>(
-    this: ModelClass<T, A>,
-    query?: LokiQuery<LokiObj & A>,
-    db = container.get("Tenant")
-  ): T[] {
-    return db
-      .getCollection(this.$collection)
-      .find(query)
-      .map((record) => new this(record));
+  public static find<A extends BaseAttributes, T extends Model<A>>(this: ModelClass<T, A>, query?: LokiQuery<LokiObj & A>): T[] {
+    return this.collection.find(query).map((record) => new this(record));
   }
 
   /**
@@ -194,10 +189,9 @@ export abstract class Model<A extends BaseAttributes> {
   public static findBy<A extends BaseAttributes, T extends Model<A>>(
     this: ModelClass<T, A>,
     field: keyof A,
-    value: any,
-    db = container.get("Tenant")
+    value: any
   ): T | undefined {
-    const record = db.getCollection(this.$collection).by(field, value);
+    const record = this.collection.by(field, value);
     if (record) {
       return new this(record);
     }
@@ -212,14 +206,19 @@ export abstract class Model<A extends BaseAttributes> {
    */
   public static findOne<A extends BaseAttributes, T extends Model<A>>(
     this: ModelClass<T, A>,
-    query?: LokiQuery<LokiObj & A>,
-    db = container.get("Tenant")
+    query?: LokiQuery<LokiObj & A>
   ): T | undefined {
-    const record = db.getCollection(this.$collection).findOne(query);
+    const record = this.collection.findOne(query);
     if (record) {
       return new this(record);
     }
   }
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Mutators
+   |--------------------------------------------------------------------------------
+   */
 
   /**
    * Update the given data record.
@@ -228,12 +227,11 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns Updated model.
    */
-  public update<T extends Model<A>>(this: T, data: Partial<A>, db = container.get("Tenant")): T {
-    const prevRecord = db.getCollection(this.$collection).by("id", this.id);
+  public update<T extends Model<A>>(this: T, data: Partial<A>): T {
+    const prevRecord = this.collection.by("id", this.id);
     if (prevRecord) {
-      const nextRecord = db.getCollection(this.$collection).update({ ...prevRecord, ...data });
-      const instance = new (this.constructor as ModelClass<T, this>)(nextRecord);
-      return instance.save().emit(this.$collection, { type: "update", instance });
+      const nextRecord = this.collection.update({ ...prevRecord, ...data });
+      return new (this.constructor as ModelClass<T, this>)(nextRecord).save("update");
     }
     return this;
   }
@@ -241,13 +239,12 @@ export abstract class Model<A extends BaseAttributes> {
   /**
    * Delete the model record.
    */
-  public delete(db = container.get("Tenant")): void {
-    const record = db.getCollection(this.$collection).by("id", this.id);
+  public delete(): void {
+    const record = this.collection.by("id", this.id);
     if (record) {
-      db.getCollection(this.$collection).remove(record);
-      this.save();
+      this.collection.remove(record);
     }
-    this.emit(this.$collection, { type: "delete", instance: this });
+    this.save("delete");
   }
 
   /*
@@ -261,10 +258,10 @@ export abstract class Model<A extends BaseAttributes> {
    */
 
   /**
-   * Emit an event to all model observers.
+   * Emit an event to all observers of the
    *
    * @remarks
-   * This method is mainly used to trigger side effects in children or parent
+   * This method is mainly used to trigger side effects in children or owner
    * models that might be listening for decoupled changes.
    *
    * @param target - Model id or an array of ids.
@@ -272,37 +269,9 @@ export abstract class Model<A extends BaseAttributes> {
    *
    * @returns This
    */
-  public emit<T extends Model<A>>(target: string | string[], action: Action<T>): this {
-    if (Array.isArray(target)) {
-      for (const id of target) {
-        events.emit(id, action);
-      }
-    } else {
-      events.emit(target, action);
-    }
-    return this;
-  }
-
-  /*
-   |--------------------------------------------------------------------------------
-   | Helpers
-   |--------------------------------------------------------------------------------
-   */
-
-  /**
-   * Store the changes by executing a save operation to the database layer.This is
-   * wrapped in a debounce so we don't end up spamming expensive save requests when
-   * multiple updates are occurring in rapid sequence. This debounce ensures that
-   * we only save the database after half a second of write inactivity across all
-   * models.
-   *
-   * @returns This
-   */
-  private save(db = container.get("Tenant")): this {
-    clearTimeout(debounce);
-    debounce = setTimeout(() => {
-      db.save();
-    }, 500);
+  public save<T extends Model<A>>(type: Action<T>["type"]): this {
+    events.model.emit(this.$collection, { type, instance: this });
+    events.database.emit("save", getStreamId());
     return this;
   }
 
