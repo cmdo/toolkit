@@ -1,6 +1,6 @@
 {
   "name": "cmdo-events",
-  "version": "0.9.2",
+  "version": "1.0.0-beta.0",
   "description": "CMDO event store service",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
@@ -28,7 +28,6 @@
     "lint": "../../node_modules/.bin/eslint 'src/**/*.ts'"
   },
   "dependencies": {
-    "cmdo-inverse": "1.2.0",
     "eventemitter3": "4.0.7"
   },
   "devDependencies": {

@@ -25,7 +25,7 @@ export class EventSubscriber<T extends Event> {
   public readonly handle: EventHandler<T>;
 
   constructor(event: EventClass<T>, handle: EventHandler<T>) {
-    this.type = new event().type;
+    this.type = new event({}, "setup").type;
     this.handle = handle;
   }
 }

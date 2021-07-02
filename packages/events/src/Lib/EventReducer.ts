@@ -37,7 +37,7 @@ export class EventReducer<State = unknown> {
    * @returns EventReducer
    */
   public set<T extends Event>(event: EventClass<T>, reducer: EventHandler<State, T>): this {
-    this.actions.set(new event().type, reducer);
+    this.actions.set(new event({}, "setup").type, reducer);
     return this;
   }
 
