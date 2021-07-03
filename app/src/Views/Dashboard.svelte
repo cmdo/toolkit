@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { UserCreated } from "shared";
-  import type { EventDescriptor } from "shared";
-
   import { socket } from "../Lib/Socket";
   import { createUser } from "../Actions/User";
   import { sync } from "../Lib/Sync";
@@ -20,7 +17,7 @@
   }
 
   function syncDown() {
-    sync.getTenantEvents(getTenantId());
+    sync.refresh(getTenantId());
   }
 
   function join() {

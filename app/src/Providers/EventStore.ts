@@ -37,7 +37,7 @@ export const store = new (class EventStore {
       }
     }
     saveDatabase(tenantId);
-    sync.postTenantEvents(tenantId);
+    sync.refresh(tenantId);
   }
 
   //#endregion

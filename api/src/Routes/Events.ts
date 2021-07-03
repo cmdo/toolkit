@@ -1,7 +1,6 @@
 import { Route } from "cmdo-socket";
 
 import { wss } from "../Providers/WebSocketServer";
-import { addEvents } from "../Services/Events/Actions/AddEvents";
-import { getEvents } from "../Services/Events/Actions/GetEvents";
+import { syncEvents } from "../Services/Events/Actions/SyncEvents";
 
-wss.register([Route.on("AddEvents", [addEvents]), Route.on("GetEvents", [getEvents])]);
+wss.register([Route.on("SyncEvents", [syncEvents])]);

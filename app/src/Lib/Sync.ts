@@ -17,49 +17,37 @@ import { socket } from "./Socket";
 
 export const sync = {
   on(tenantId: string) {
-    socket.on(`${tenantId}:event`, onEventAdded);
+    socket.join(tenantId);
+    socket.on("EventAdded", onEventAdded);
   },
 
   off(tenantId: string) {
-    socket.off(`${tenantId}:event`, onEventAdded);
+    socket.leave(tenantId);
+    socket.off("EventAdded", onEventAdded);
   },
 
   async refresh(tenantId: string) {
-    // ...
-  },
-
-  async postTenantEvents(tenantId: string) {
-    const localEvents = getCollection<EventDescriptor>(tenantId, "events")
-      .find({ "event.localId": { $gt: getSentLocalId(tenantId) ?? "" } })
-      .sort(orderByLocalId)
-      .map((event) => {
-        delete event.$loki;
-        return event;
-      });
-
-    if (localEvents.length > 0) {
-      socket
-        .post("AddEvents", { tenantId, streamId: "main", localId: getReceivedLocalId(tenantId), events: localEvents })
-        .then(({ events, localId }) => {
-          for (const descriptor of events) {
-            addEvent(tenantId, descriptor);
-          }
-          setReceivedLocalId(tenantId, localId);
-          setSentLocalId(tenantId, localEvents[localEvents.length - 1].event.localId);
-        });
-    }
-  },
-
-  async getTenantEvents(tenantId: string) {
+    const events = getQueuedEvents(tenantId);
     socket
-      .post("GetEvents", { tenantId, localId: getReceivedLocalId(tenantId) })
-      .then(({ events }) => {
-        console.log(events);
-        for (const descriptor of events) {
-          addEvent(tenantId, descriptor);
+      .post("SyncEvents", { tenantId, streamId: "main", localId: getReceivedLocalId(tenantId), events })
+      .then((data) => {
+        console.log(data);
+
+        if (data.localId) {
+          setReceivedLocalId(tenantId, data.localId);
         }
-        if (events.length > 0) {
-          setReceivedLocalId(tenantId, events[events.length - 1].event.localId);
+
+        let localId: string | undefined;
+        if (data.events.length > 0) {
+          for (const descriptor of data.events) {
+            localId = addEvent(tenantId, descriptor);
+          }
+        }
+
+        if (localId) {
+          setSentLocalId(tenantId, localId);
+        } else if (events.length > 0) {
+          setSentLocalId(tenantId, events[events.length - 1].event.localId);
         }
       })
       .catch(console.log);
@@ -76,17 +64,13 @@ export const sync = {
 
 //#region Utilities
 
-function onEventAdded({ tenantId, prevLocalId, nextLocalId }) {
-  const currentLocalId = getReceivedLocalId(tenantId);
-  if (currentLocalId === prevLocalId) {
-    localStorage.setItem(`${tenantId}.received`, nextLocalId);
-  } else if (!currentLocalId || currentLocalId < nextLocalId) {
-    sync.getTenantEvents(tenantId);
-  }
+function onEventAdded({ tenantId }) {
+  console.log("Event Added", tenantId);
+  sync.refresh(tenantId);
 }
 
 function addEvent(tenantId: string, remote: EventDescriptor): string | undefined {
-  const collection = getCollection<EventDescriptor>(tenantId, "events");
+  const collection = getCollection(tenantId, "events");
 
   const count = collection.count({ "event.originId": remote.event.originId });
   if (count > 0) {
@@ -105,10 +89,20 @@ function addEvent(tenantId: string, remote: EventDescriptor): string | undefined
     if (local) {
       publisher.publish(new events[local.event.type](local.event.data, local.event.localId, local.event.originId).decrypt("sample"));
     }
-    return local.event.originId;
+    return local.event.localId;
   } catch (error) {
     console.log("Sync Violation: Failed to insert provided event", error);
   }
+}
+
+function getQueuedEvents(tenantId: string): EventDescriptor[] {
+  return getCollection(tenantId, "events")
+    .find({ "event.localId": { $gt: getSentLocalId(tenantId) ?? "" } })
+    .sort(orderByLocalId)
+    .map((event) => {
+      delete event.$loki;
+      return event;
+    });
 }
 
 function setSentLocalId(tenantId: string, localId: string) {
