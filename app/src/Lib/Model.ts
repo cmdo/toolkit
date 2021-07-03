@@ -3,7 +3,7 @@ import type { Collection } from "./Database/Collections";
 import { getCollection } from "./Database/Utils";
 import { events } from "./Events";
 import { observe, observeOne } from "./Observe";
-import { getStreamId } from "./Stream";
+import { getTenantId } from "./Tenant";
 
 /*
  |--------------------------------------------------------------------------------
@@ -62,11 +62,11 @@ export abstract class Model<A extends BaseAttributes> {
   }
 
   public static get collection(): LokiConstructor.Collection {
-    return getCollection(getStreamId(), this.$collection);
+    return getCollection(getTenantId(), this.$collection);
   }
 
   public get collection(): LokiConstructor.Collection {
-    return getCollection(getStreamId(), this.$collection);
+    return getCollection(getTenantId(), this.$collection);
   }
 
   /*
@@ -271,7 +271,7 @@ export abstract class Model<A extends BaseAttributes> {
    */
   public save<T extends Model<A>>(type: Action<T>["type"]): this {
     events.model.emit(this.$collection, { type, instance: this });
-    events.database.emit("save", getStreamId());
+    events.database.emit("save", getTenantId());
     return this;
   }
 

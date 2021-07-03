@@ -1,34 +1,61 @@
-import type { Descriptor } from "cmdo-events";
-import { EventReducer, publisher } from "cmdo-events";
+import type { EventReducer } from "cmdo-events";
 import type { Event } from "shared";
+import type { EventDescriptor } from "shared";
 import { events } from "shared";
 
 import { container } from "../Container";
-import { api } from "../Lib/Request";
+import { getCollection, saveDatabase } from "../Lib/Database/Utils";
+import { sync } from "../Lib/Sync";
+import { getTenantId } from "../Lib/Tenant";
+import { toArray } from "../Utils/Array";
 import { orderByOriginId } from "../Utils/Sort";
-
-let debounce: NodeJS.Timeout;
+import { publisher } from "./EventPublisher";
 
 /*
  |--------------------------------------------------------------------------------
- | Store
+ | Event Store
  |--------------------------------------------------------------------------------
  */
 
-//#region Store
+//#region Event Store
 
 export const store = new (class EventStore {
-  public async save(events: Event | Event[]): Promise<void> {
-    insertEvents(getEventsAsArray(events));
-    saveDatabase();
+  /*
+   |--------------------------------------------------------------------------------
+   | Persistors
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Persistors
+
+  public async save(events: Event | Event[]) {
+    const tenantId = getTenantId();
+    for (const event of toArray(events)) {
+      const descriptor = getCollection<EventDescriptor>(tenantId, "events").insertOne(getEventDescriptor(tenantId, "main", event));
+      if (descriptor) {
+        publisher.publish(event);
+      }
+    }
+    saveDatabase(tenantId);
+    sync.postTenantEvents(tenantId);
   }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Reducers
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Reducers
 
   public async reduceById<T extends EventReducer>(
     id: string,
     reducer: T,
     initialState = reducer.initialState
   ): Promise<ReturnType<T["reduce"]>> {
-    return this.reduce({ "data.id": id }, reducer, initialState);
+    return this.reduce({ "event.data.id": id }, reducer, initialState);
   }
 
   public async reduce<T extends EventReducer>(
@@ -37,12 +64,14 @@ export const store = new (class EventStore {
     initialState = reducer.initialState,
     db = container.get("Tenant")
   ): Promise<ReturnType<T["reduce"]>> {
-    const events = db.getCollection<Descriptor>("events").find(filter).sort(orderByOriginId).map(fromEvent);
+    const events = db.getCollection<EventDescriptor>("events").find(filter).sort(orderByOriginId).map(fromEvent);
     if (events.length === 0) {
       throw new Error("Reducer Violation: Query did not yield any events to reduce.");
     }
     return events.reduce(reducer.reduce, initialState);
   }
+
+  //#endregion
 })();
 
 //#endregion
@@ -55,52 +84,19 @@ export const store = new (class EventStore {
 
 //#region Utilities
 
-function fromEvent(descriptor: Descriptor) {
-  if (!events[descriptor.type]) {
-    throw new Error(`Event Violation > Could not resolve '${descriptor.type}' from event store.`);
+function fromEvent({ event }: EventDescriptor) {
+  if (!events[event.type]) {
+    throw new Error(`Event Violation > Could not resolve '${event.type}' from event store.`);
   }
-  return new events[descriptor.type](descriptor.data, descriptor.localId, descriptor.originId).decrypt("sample");
+  return new events[event.type](event.data, event.localId, event.originId).decrypt("sample");
 }
 
-function getEventsAsArray(events: Event | Event[]): Event[] {
-  if (Array.isArray(events)) {
-    return events;
-  }
-  return [events];
-}
-
-function insertEvents(events: Event[]): void {
-  for (const event of events) {
-    insertAndPublishEvent(event);
-  }
-}
-
-function insertAndPublishEvent(event: Event, db = container.get("Tenant")): void {
-  const descriptor = db.getCollection<Descriptor>("events").insertOne(event.encrypt("sample"));
-  if (descriptor) {
-    publish(event);
-    post(descriptor);
-  }
-}
-
-function publish(event: Event): void {
-  publisher.publish(event);
-}
-
-async function post(descriptor: Descriptor): Promise<any> {
-  return api.post(`/streams/toolkit/events`, { ...descriptor, $loki: undefined }).then((res) => {
-    if (res.status === "error") {
-      console.log(res);
-    }
-    return res;
-  });
-}
-
-function saveDatabase(db = container.get("Tenant")): void {
-  clearTimeout(debounce);
-  debounce = setTimeout(() => {
-    db.save();
-  }, 500);
+function getEventDescriptor(tenantId: string, streamId: string, event: Event): EventDescriptor {
+  return {
+    tenantId,
+    streamId,
+    event: event.encrypt("sample")
+  };
 }
 
 //#endregion

@@ -1,7 +1,7 @@
 import { setOrigin } from "cmdo-events";
 
 import { socket } from "./Lib/Socket";
-import { setStream } from "./Lib/Stream";
+import { setTenant } from "./Lib/Tenant";
 import { origin } from "./Providers/EventOrigin";
 
 export async function setup() {
@@ -10,5 +10,5 @@ export async function setup() {
 
   await Promise.all([import("./Subscribers/User")]);
 
-  await setStream("toolkit");
+  await setTenant("toolkit");
 }

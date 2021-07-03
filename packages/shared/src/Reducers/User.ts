@@ -1,8 +1,8 @@
 import { EventReducer } from "cmdo-events";
 
-import type { UserCreated } from "../Events/UserCreated";
-import type { UserEmailSet } from "../Events/UserEmailSet";
-import type { UserNameSet } from "../Events/UserNameSet";
+import { UserCreated } from "../Events/UserCreated";
+import { UserEmailSet } from "../Events/UserEmailSet";
+import { UserNameSet } from "../Events/UserNameSet";
 
 /*
  |--------------------------------------------------------------------------------
@@ -10,11 +10,15 @@ import type { UserNameSet } from "../Events/UserNameSet";
  |--------------------------------------------------------------------------------
  */
 
+//#region Types
+
 type State = {
   id: string;
   name: string;
   email: string;
 };
+
+//#endregion
 
 /*
  |--------------------------------------------------------------------------------
@@ -22,24 +26,28 @@ type State = {
  |--------------------------------------------------------------------------------
  */
 
+//#region Reducer
+
 export const reducer = new EventReducer<State>()
-  .set("UserCreated", function ({ data }: UserCreated) {
+  .set(UserCreated, (state, { data }) => {
     return {
-      ...this,
+      ...state,
       id: data.id,
       name: data.name,
       email: data.email
     };
   })
-  .set("UserEmailSet", function ({ data }: UserEmailSet) {
+  .set(UserEmailSet, (state, { data }) => {
     return {
-      ...this,
+      ...state,
       email: data.email
     };
   })
-  .set("UserNameSet", function ({ data }: UserNameSet) {
+  .set(UserNameSet, (state, { data }) => {
     return {
-      ...this,
+      ...state,
       name: data.name
     };
   });
+
+//#endregion

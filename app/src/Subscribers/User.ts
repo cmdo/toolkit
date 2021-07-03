@@ -2,7 +2,7 @@ import { EventSubscriber, getUnixTimestamp } from "cmdo-events";
 import { UserCreated, UserEmailSet, UserNameSet } from "shared";
 
 import { User } from "../Models/User";
-import { publisher } from "../Providers/Publisher";
+import { publisher } from "../Providers/EventPublisher";
 
 publisher.subscribe(
   new EventSubscriber(UserCreated, ({ originId, data }) => {

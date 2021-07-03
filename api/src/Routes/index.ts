@@ -1,2 +1,3 @@
 import "./Api";
-import "./Streams";
+import "./Events";
+import "./Socket";

@@ -3,11 +3,11 @@ require("dotenv").config();
 import "./Routes";
 
 import { container as access } from "cmdo-access";
-import { cors, route, server } from "cmdo-http";
-import { ws } from "cmdo-socket";
 
 import { AccessStore } from "./Providers/AccessStore";
+import { hts } from "./Providers/HttpServer";
 import { mongo } from "./Providers/Mongo";
+import { wss } from "./Providers/WebSocketServer";
 
 const PORT = 8370;
 
@@ -48,9 +48,8 @@ async function providers(): Promise<void> {
  */
 
 async function start(): Promise<void> {
-  const httpServer = server([cors(), route()]);
-  await ws.connect(httpServer, () => {});
-  httpServer.listen(PORT, () => {
+  wss.connect(hts);
+  hts.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
   });
 }

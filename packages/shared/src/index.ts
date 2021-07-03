@@ -21,3 +21,11 @@ export { UserCreated, UserEmailSet, UserNameSet };
  */
 
 export { reducer as userReducer } from "./Reducers/User";
+
+/*
+ |--------------------------------------------------------------------------------
+ | Types
+ |--------------------------------------------------------------------------------
+ */
+
+export * from "./Types/Event";

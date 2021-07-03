@@ -2,10 +2,9 @@ import { getId } from "cmdo-events";
 import type { EventDescriptor } from "shared";
 import { events } from "shared";
 
-import { container } from "../Container";
-import { publisher } from "../Providers/Publisher";
+import { publisher } from "../Providers/EventPublisher";
 import { orderByLocalId } from "../Utils/Sort";
-import { api } from "./Request";
+import { getCollection } from "./Database/Utils";
 import { socket } from "./Socket";
 
 /*
@@ -17,72 +16,53 @@ import { socket } from "./Socket";
 //#region Synchronization
 
 export const sync = {
-  /**
-   * Start listening for event changes for the given tenant.
-   *
-   * @param tenantId - Tenant id to listen for changes too.
-   */
-  on(tenantId: string): void {
-    socket.on(`${tenantId}:event`, handleEvent);
+  on(tenantId: string) {
+    socket.on(`${tenantId}:event`, onEventAdded);
   },
 
-  /**
-   * Stop listening for event changes for the given tenant.
-   *
-   * @param tenantId - Tenant id to stop listening too.
-   */
-  off(tenantId: string): void {
-    socket.off(`${tenantId}:event`, handleEvent);
+  off(tenantId: string) {
+    socket.off(`${tenantId}:event`, onEventAdded);
   },
 
-  /**
-   * Perform both get and send commands to the given tenant.
-   *
-   * @param tenantId - Tenant to refresh.
-   */
-  async refresh(tenantId: string, db = container.get("Tenant")): Promise<void> {
-    const events = db
-      .getCollection("events")
-      .find({ localId: { $gt: localStorage.getItem(`${tenantId}.sent`) || "" } })
+  async refresh(tenantId: string) {
+    // ...
+  },
+
+  async postTenantEvents(tenantId: string) {
+    const localEvents = getCollection<EventDescriptor>(tenantId, "events")
+      .find({ "event.localId": { $gt: getSentLocalId(tenantId) ?? "" } })
       .sort(orderByLocalId)
       .map((event) => {
         delete event.$loki;
         return event;
       });
 
-    // ### Send Sync Request
-
-    const res = await api.post(`/streams/${tenantId}/sync`, {
-      timestamp: localStorage.getItem(`${tenantId}.received`) || undefined,
-      events
-    });
-
-    // ### Handle Response
-
-    switch (res.status) {
-      case "success": {
-        localStorage.setItem(`${tenantId}.received`, res.data.timestamp);
-
-        let localId: string | undefined;
-        if (res.data.events.length > 0) {
-          for (const descriptor of res.data.events) {
-            localId = addRemoteEvent(descriptor);
+    if (localEvents.length > 0) {
+      socket
+        .post("AddEvents", { tenantId, streamId: "main", localId: getReceivedLocalId(tenantId), events: localEvents })
+        .then(({ events, localId }) => {
+          for (const descriptor of events) {
+            addEvent(tenantId, descriptor);
           }
-        }
-
-        if (localId) {
-          localStorage.setItem(`${tenantId}.sent`, localId || events[events.length - 1].localId);
-        } else if (events.length > 0) {
-          localStorage.setItem(`${tenantId}.sent`, events[events.length - 1].localId);
-        }
-
-        break;
-      }
-      case "error": {
-        console.log(res);
-        break;
-      }
+          setReceivedLocalId(tenantId, localId);
+          setSentLocalId(tenantId, localEvents[localEvents.length - 1].event.localId);
+        });
     }
+  },
+
+  async getTenantEvents(tenantId: string) {
+    socket
+      .post("GetEvents", { tenantId, localId: getReceivedLocalId(tenantId) })
+      .then(({ events }) => {
+        console.log(events);
+        for (const descriptor of events) {
+          addEvent(tenantId, descriptor);
+        }
+        if (events.length > 0) {
+          setReceivedLocalId(tenantId, events[events.length - 1].event.localId);
+        }
+      })
+      .catch(console.log);
   }
 };
 
@@ -96,39 +76,21 @@ export const sync = {
 
 //#region Utilities
 
-/**
- * Handle incoming event notification.
- *
- * @remarks
- *
- * If the originSocketId matches the current clients socket id, and the previous
- * local id is the one we have cached locally. We skip the syncing process since
- * we now know that the next local id came right after the last known local id.
- *
- * If the above use case is not valid then we check if the current local id is
- * younger than the next local id. If they do not match we are out of sync and
- * send another sync request to get back to parity.
- *
- * @param originSocketId - Socket id of the client that logged the event.
- * @param tenantId       - Tenant id in which the event was logged under.
- * @param prevLocalId    - Local id of the last known event before the next event.
- * @param nextLocalId    - Local id of the logged event.
- */
-function handleEvent(originSocketId: string | undefined, tenantId: string, prevLocalId: string | undefined, nextLocalId: string) {
-  const currentLocalId = localStorage.getItem(`${tenantId}.received`) || undefined;
-  if (originSocketId === socket?.id && currentLocalId === prevLocalId) {
+function onEventAdded({ tenantId, prevLocalId, nextLocalId }) {
+  const currentLocalId = getReceivedLocalId(tenantId);
+  if (currentLocalId === prevLocalId) {
     localStorage.setItem(`${tenantId}.received`, nextLocalId);
   } else if (!currentLocalId || currentLocalId < nextLocalId) {
-    sync.refresh(tenantId);
+    sync.getTenantEvents(tenantId);
   }
 }
 
-function addRemoteEvent(remote: EventDescriptor, db = container.get("Tenant")): string | undefined {
-  const collection = db.getCollection<EventDescriptor>("events");
+function addEvent(tenantId: string, remote: EventDescriptor): string | undefined {
+  const collection = getCollection<EventDescriptor>(tenantId, "events");
 
   const count = collection.count({ "event.originId": remote.event.originId });
   if (count > 0) {
-    console.log("Remote Event Violation: Event already exists, skipping insertion.");
+    console.log("Sync Violation: Event already exists, skipping insertion.");
     return;
   }
 
@@ -143,10 +105,26 @@ function addRemoteEvent(remote: EventDescriptor, db = container.get("Tenant")): 
     if (local) {
       publisher.publish(new events[local.event.type](local.event.data, local.event.localId, local.event.originId).decrypt("sample"));
     }
-    return local.event.localId;
+    return local.event.originId;
   } catch (error) {
-    console.log("Remote Event Violation: Failed to insert provided event", error);
+    console.log("Sync Violation: Failed to insert provided event", error);
   }
+}
+
+function setSentLocalId(tenantId: string, localId: string) {
+  localStorage.setItem(`${tenantId}.sent`, localId);
+}
+
+function setReceivedLocalId(tenantId: string, localId: string) {
+  localStorage.setItem(`${tenantId}.received`, localId);
+}
+
+function getSentLocalId(tenantId: string): string | undefined {
+  return localStorage.getItem(`${tenantId}.sent`) ?? undefined;
+}
+
+function getReceivedLocalId(tenantId: string): string | undefined {
+  return localStorage.getItem(`${tenantId}.received`) ?? undefined;
 }
 
 //#endregion
