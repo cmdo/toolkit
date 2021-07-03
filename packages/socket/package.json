@@ -1,7 +1,7 @@
 {
   "name": "cmdo-socket",
-  "version": "1.1.1",
-  "description": "Simple web socket solution written for nodejs.",
+  "version": "2.0.0-beta.0",
+  "description": "Simple WebSocket solution built on ws.",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <christoffer@kodemon.net>",
   "license": "MIT",
@@ -9,7 +9,8 @@
   "types": "dist/index.d.ts",
   "keywords": [
     "server",
-    "socket"
+    "socket",
+    "ws"
   ],
   "cmdo": {
     "type": "module"

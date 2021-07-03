@@ -1,73 +1,107 @@
 import * as http from "http";
-import * as url from "url";
+import { URL } from "url";
 import WebSocket from "ws";
 
-import { SocketClient } from "./Client";
+import type { Action } from "./Action";
+import * as responses from "./Action";
+import { Client } from "./Client";
+import { Room } from "./Room";
+import { Route } from "./Route";
 
-export type OnSocketConnection = (this: WebSocket, socket: SocketClient) => void;
-
-type Sockets = {
-  [uuid: string]: SocketClient;
+type Settings = {
+  urlPath: string;
 };
 
-type PublishOptions = {
-  event: string;
-  filter?: string[];
-};
+/*
+ |--------------------------------------------------------------------------------
+ | Server
+ |--------------------------------------------------------------------------------
+ */
 
-export class SocketServer {
-  /**
-   * List of connected sockets.
-   * @type {Sockets}
-   */
-  public sockets: Sockets = {};
+//#region Server
 
-  /**
-   * Create a socket server and wait for incoming connections.
-   *
-   * @param target        - Port or http server.
-   * @param handleConnect - On connect handler.
+export class Server {
+  public routes = new Map<string, Action[]>();
+
+  public rooms = new Map<string, Set<WebSocket>>();
+
+  public settings: Settings;
+  public actions: Action[];
+
+  private _server?: WebSocket.Server;
+
+  constructor(settings?: Partial<Settings>, actions: Action[] = []) {
+    this.settings = {
+      urlPath: settings?.urlPath ?? "/socket"
+    };
+    this.actions = actions;
+  }
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Server
+   |--------------------------------------------------------------------------------
    */
-  public async connect(target: number | http.Server, handleConnect: OnSocketConnection): Promise<void> {
-    if (typeof target === "number") {
-      this.connectWithPort(target, handleConnect);
-    } else {
-      this.connectWithServer(target, handleConnect);
+
+  //#region Server
+
+  public set server(server: WebSocket.Server) {
+    this._server = server;
+  }
+
+  public get server(): WebSocket.Server {
+    if (!this._server) {
+      throw new Error("WebSocket Server Violation > Server instance has not been assigned!");
+    }
+    return this._server;
+  }
+
+  public get clients() {
+    return this.server.clients;
+  }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Setup
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Setup
+
+  public register(routes: Route[]) {
+    for (const route of routes) {
+      this.routes.set(route.event, [...this.actions, ...route.actions]);
     }
   }
 
-  /**
-   * Connect with port.
-   *
-   * @remarks
-   * Creates a new WebSocket server listening on its own personal port.
-   *
-   * @param port          - WebSocket port.
-   * @param handleConnect - On connect handler.
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Connect
+   |--------------------------------------------------------------------------------
    */
-  public async connectWithPort(port: number, handleConnect: OnSocketConnection): Promise<void> {
-    this.onConnect(new WebSocket.Server({ port }), handleConnect);
+
+  //#region Connect
+
+  public connect(portOrServer: number | http.Server): void {
+    if (typeof portOrServer === "number") {
+      this.server = new WebSocket.Server({ port: portOrServer });
+    } else {
+      this.server = new WebSocket.Server({ noServer: true });
+      this.addUpgradeListener(portOrServer);
+    }
+    this.addConnectionListener();
   }
 
-  /**
-   * Connect with server.
-   *
-   * @remarks
-   * Creates a new WebSocket that injects onto a http server allowing for sharing
-   * the same port.
-   *
-   * @param httpServer    - Http server.
-   * @param handleConnect - On connect handler.
-   */
-  public async connectWithServer(httpServer: http.Server, handleConnect: OnSocketConnection): Promise<void> {
-    const server = new WebSocket.Server({ noServer: true });
-    this.onConnect(server, handleConnect);
-    httpServer.on("upgrade", function upgrade(request, socket, head) {
-      const pathname = url.parse(request.url).pathname;
-
-      if (pathname === "/socket") {
-        server.handleUpgrade(request, socket, head, function done(ws) {
-          server.emit("connection", ws, request);
+  private addUpgradeListener(httpServer: http.Server): void {
+    httpServer.on("upgrade", (req, socket, head) => {
+      const pathname = getPathname(req);
+      if (pathname === this.settings.urlPath) {
+        this.server.handleUpgrade(req, socket, head, (ws) => {
+          this.server.emit("connection", ws, req);
         });
       } else {
         socket.destroy();
@@ -75,63 +109,152 @@ export class SocketServer {
     });
   }
 
-  /**
-   * Connection handler.
-   *
-   * @param server        - Server to listen for connection events for.
-   * @param handleConnect - On connect handler.
-   */
-  private onConnect(server: WebSocket.Server, handleConnect: OnSocketConnection): void {
-    server.on("connection", (socket) => {
-      const client = new SocketClient(socket);
+  private addConnectionListener(): void {
+    this.server.on("connection", (socket) => {
+      const client = new Client(this, socket);
 
-      console.log(`socket connected ${client.id}`);
+      console.log(`WebSocket Server > Client ${client.id} connected.`);
 
-      // ### Store Socket
-      // Remember the socket so we can provide unique operations and perform server
-      // wide messages.
-
-      this.sockets[client.id] = client;
-
-      // ### Provide Socket
-      // Send the connected socket to the connect callback for event registration.
-
-      handleConnect.call(socket, client);
-
-      // ### Publish Client Id
-
-      client.publish("handshake", client.id);
-
-      // ### Remove Socket
-      // Remove the socket from the socket list if the connection is closed.
+      socket.on("message", (value) => {
+        if (typeof value === "string") {
+          this.onMessage(client, JSON.parse(value));
+        }
+      });
 
       socket.on("close", () => {
-        console.log(`socket disconnected ${client.id}`);
-        delete this.sockets[client.id];
+        console.log(`WebSocket Server > Client ${client.id} disconnected.`);
       });
     });
   }
 
-  /**
-   * Publish an event to all the connected sockets.
-   *
-   * @param event - Event trigger.
-   * @param args  - Event arguments.
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Rooms
+   |--------------------------------------------------------------------------------
    */
-  public publish(options: PublishOptions, ...args: any[]): void;
-  public publish(target: string, ...args: any[]): void;
-  public publish(out: string | PublishOptions, ...args: any[]): void {
-    for (const uuid in this.sockets) {
-      if (typeof out === "string") {
-        this.sockets[uuid].publish(out, ...args);
-      } else {
-        const { event, filter = [] } = out;
-        if (!filter.includes(uuid)) {
-          this.sockets[uuid].publish(event, ...args);
+
+  //#region Channels
+
+  /**
+   * Assign provided socket to the provided room.
+   *
+   * @param name   - Name of room to join.
+   * @param socket - Socket to assign to the room.
+   *
+   * @returns Server
+   */
+  public join(name: string, socket: WebSocket) {
+    const room = this.rooms.get(name);
+    if (room) {
+      room.add(socket);
+    } else {
+      this.rooms.set(name, new Set([socket]));
+    }
+    return this;
+  }
+
+  /**
+   * Remove provided socket from the provided room.
+   *
+   * @param name   - Name of room to leave.
+   * @param socket - Socket to remove from the room.
+   *
+   * @returns Server
+   */
+  public leave(name: string, socket: WebSocket) {
+    const room = this.rooms.get(name);
+    if (room) {
+      room.delete(socket);
+    }
+    return this;
+  }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Emitters
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Emitters
+
+  /**
+   * Broadcast a event to all clients.
+   *
+   * @param event - Broadcast event name.
+   * @param data  - Data object to send.
+   *
+   * @returns Server
+   */
+  public broadcast(event: string, data: Record<string, unknown> = {}) {
+    for (const client of this.server.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({ event, data }));
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Broadcast a event to all clients in the provided room.
+   *
+   * @param name - Name of the room to broadcast too.
+   *
+   * @returns Room
+   */
+  public to(name: string): Room {
+    return new Room(this).to(name);
+  }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Listeners
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region Listeners
+
+  private async onMessage(client: Client, { id, event, data }: any): Promise<void> {
+    const actions = this.routes.get(event);
+    if (!actions) {
+      return client.socket.send(
+        JSON.stringify({ id, data: { status: "rejected", message: `Socket Violation > Event '${event}' has no registered handler.` } })
+      );
+    }
+    for (const action of actions) {
+      const res = await action.call(responses, client, data);
+      switch (res.status) {
+        case "accepted": {
+          break;
+        }
+        case "rejected":
+        case "respond": {
+          return client.socket.send(JSON.stringify({ id, data: res }));
         }
       }
     }
   }
+
+  //#endregion
 }
 
-export const ws = new SocketServer();
+//#endregion
+
+/*
+ |--------------------------------------------------------------------------------
+ | Utilities
+ |--------------------------------------------------------------------------------
+ */
+
+//#region Utilities
+
+function getPathname(req: any): string {
+  return new URL(req.url, req.protocol + "://" + req.headers.host + "/").pathname;
+}
+
+//#endregion
