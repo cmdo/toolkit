@@ -1,7 +1,7 @@
 <script lang="ts">
   import { socket } from "../Lib/Socket";
   import { createUser } from "../Actions/User";
-  import { sync } from "../Lib/Sync";
+  import { sync } from "../Providers/EventSync";
   import { getTenantId } from "../Lib/Tenant";
 
   socket.on("events.add", (data: any) => {

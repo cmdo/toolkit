@@ -1,4 +1,4 @@
-import { getId } from "cmdo-events";
+import { getLogicalId } from "cmdo-events";
 import type { Action } from "cmdo-socket";
 import { EventDescriptor } from "shared";
 
@@ -90,7 +90,7 @@ function getLocalDescriptor(descriptor: EventDescriptor): EventDescriptor {
     ...descriptor,
     event: {
       ...descriptor.event,
-      localId: getId("api")
+      localId: getLogicalId()
     }
   };
 }

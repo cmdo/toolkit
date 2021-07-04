@@ -1,8 +1,8 @@
 import Loki from "lokijs";
 import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter";
 
+import { sync } from "../Providers/EventSync";
 import { setDatabase, unsetDatabase } from "./Database/Utils";
-import { sync } from "./Sync";
 
 let tenantId: string | undefined;
 

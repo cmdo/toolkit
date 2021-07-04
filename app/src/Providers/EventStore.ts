@@ -5,11 +5,11 @@ import { events } from "shared";
 
 import { container } from "../Container";
 import { getCollection, saveDatabase } from "../Lib/Database/Utils";
-import { sync } from "../Lib/Sync";
 import { getTenantId } from "../Lib/Tenant";
 import { toArray } from "../Utils/Array";
 import { orderByOriginId } from "../Utils/Sort";
 import { publisher } from "./EventPublisher";
+import { sync } from "./EventSync";
 
 /*
  |--------------------------------------------------------------------------------
@@ -95,6 +95,7 @@ function getEventDescriptor(tenantId: string, streamId: string, event: Event): E
   return {
     tenantId,
     streamId,
+    deviceId: sync.deviceId,
     event: event.encrypt("sample")
   };
 }
