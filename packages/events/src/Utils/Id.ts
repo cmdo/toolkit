@@ -1,4 +1,3 @@
-import { getOrigin } from "../Providers/Origin";
 import { clock } from "./Clock";
 
 /**
@@ -8,7 +7,7 @@ import { clock } from "./Clock";
  *
  * @returns Logical timestamp id
  */
-export function getId(origin = getOrigin()): string {
+export function getLogicalId(): string {
   const ts = clock.now().toJSON();
-  return `${ts.time}-${ts.logical}@${origin}`;
+  return `${ts.time}-${ts.logical}`;
 }

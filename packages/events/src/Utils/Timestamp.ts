@@ -8,8 +8,7 @@ import { Timestamp } from "../Lib/Timestamp";
  * @returns Timestamp
  */
 export function getTimestamp(id: string): Timestamp {
-  const [timestamp] = id.split("@");
-  const [time, logical] = timestamp.split("-");
+  const [time, logical] = id.split("-");
   return new Timestamp(time, Number(logical));
 }
 

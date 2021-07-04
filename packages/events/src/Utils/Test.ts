@@ -1,6 +1,6 @@
 import type { Timestamp } from "../Lib/Timestamp";
 import { getDate } from "./Date";
-import { getId } from "./Id";
+import { getLogicalId } from "./Id";
 import { getTimestamp } from "./Timestamp";
 
 export async function runTimestampTest(i = 10, minDelay = 0, maxDelay = 1000) {
@@ -11,7 +11,7 @@ export async function runTimestampTest(i = 10, minDelay = 0, maxDelay = 1000) {
     await new Promise<void>((resolve) => {
       const timeout = Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay);
       setTimeout(() => {
-        const id = getId("app");
+        const id = getLogicalId();
         const ts = getTimestamp(id);
         const dt = getDate(id);
 

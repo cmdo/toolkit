@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { copy } from "../Utils/Copy";
-import { getId } from "../Utils/Id";
+import { getLogicalId } from "../Utils/Id";
 
 /*
  |--------------------------------------------------------------------------------
@@ -35,7 +35,11 @@ export type EventJSON = {
 export abstract class Event<Attributes = Record<string, any>> {
   public abstract readonly type: string;
 
-  constructor(public data: Attributes = {} as Attributes, public readonly localId = getId(), public readonly originId = localId) {}
+  constructor(
+    public data: Attributes = {} as Attributes,
+    public readonly localId = getLogicalId(),
+    public readonly originId = localId
+  ) {}
 
   public encrypt(_: string): EventJSON {
     return this.toJSON();

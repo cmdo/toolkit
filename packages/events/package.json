@@ -1,6 +1,6 @@
 {
   "name": "cmdo-events",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "CMDO event store service",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <dev@kodemon.net>",
