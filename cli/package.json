@@ -1,14 +1,13 @@
 {
   "name": "cmdo-cli",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Command line interface for the CMDO framework.",
   "bin": {
     "cmdo": "./dist/index.js"
   },
   "scripts": {
-    "build": "npm run compile && npm install -g cmdo-cli --force",
     "compile": "../node_modules/.bin/tsc",
-    "watch": "../node_modules/.bin/nodemon",
+    "watch": "../node_modules/.bin/tsc -w",
     "lint": "../node_modules/.bin/eslint 'src/**/*.ts'"
   },
   "repository": "https://github.com/cmdo/toolkit",
@@ -23,12 +22,5 @@
     "@types/inquirer": "^7.3.1",
     "@types/node": "^14.14.37",
     "@types/react": "^17.0.3"
-  },
-  "nodemonConfig": {
-    "watch": [
-      "src/"
-    ],
-    "ext": "ts",
-    "exec": "npm run build"
   }
 }

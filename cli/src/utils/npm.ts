@@ -7,6 +7,7 @@ export const npm = {
    * @param cwd - Working directory to run NPM install.
    */
   async install(cwd: string) {
+    console.log("CMDO NPM INSTALL", cwd);
     const cursor = spawn("npm", ["i"], { stdio: "inherit", cwd });
     return new Promise((resolve, reject) => {
       cursor.on("close", resolve);

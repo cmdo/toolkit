@@ -76,11 +76,11 @@ export async function getPackages(toArray = false): Promise<Packages | Package[]
             const pkg = getPackage(uri);
             if (pkg.cmdo !== undefined) {
               packages.set(pkg.name, {
-                type: pkg.cmdo.type,
+                type: pkg.cmdo.root ? "root" : pkg.cmdo.type,
                 name: pkg.name,
                 version: pkg.version,
                 description: pkg.description,
-                path: uri.replace("/package.json", "")
+                path: getPackagePath(uri)
               });
             }
           } catch (err) {
@@ -106,4 +106,39 @@ function getPackage(uri: string) {
   } catch (err) {
     throw new Error(`Project Violation: Could not resolve '${uri}'.`);
   }
+}
+
+/**
+ * Take a list of packages and sort them by the given type order.
+ *
+ * @param packages - Packages to sort.
+ * @param order    - Type order to sort them in.
+ *
+ * @returns Packages.
+ */
+export function getSortedPackages(packages: Package[], order = ["root", "replica", "shared", "module"]): Package[] {
+  const sorted: Package[] = [];
+  for (const type of order) {
+    for (const pkg of packages) {
+      if (pkg.type === type) {
+        sorted.push(pkg);
+      }
+    }
+  }
+  return sorted;
+}
+
+/**
+ * Get relative path to the package.
+ *
+ * @param uri - URI to create relative path from.
+ *
+ * @returns Path.
+ */
+function getPackagePath(uri: string): string {
+  const value = uri.replace("/package.json", "");
+  if (value === "" || value === ".") {
+    return "./";
+  }
+  return value;
 }

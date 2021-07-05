@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import Table from "terminal-table";
 
-import { Package } from "./types";
 import { docker } from "./utils/docker";
+import { getList } from "./utils/list";
 import { npm } from "./utils/npm";
-import { getPackages, getPackagesByTarget } from "./utils/package";
+import { getPackagesByTarget, getSortedPackages } from "./utils/package";
 
 const pkg = require("../package.json");
 
@@ -19,7 +18,7 @@ program
   .description("run setup operations on the current project")
   .action(async (target?: string) => {
     const packages = await getPackagesByTarget(target, "Which packages do you wish to set up?");
-    for (const pkg of packages) {
+    for (const pkg of getSortedPackages(packages)) {
       await npm.install(pkg.path);
       if (pkg.type === "module" || pkg.type === "shared") {
         await npm.compile(pkg.path);
@@ -32,7 +31,7 @@ program
   .description("clean up project files")
   .action(async (target?: string) => {
     const packages = await getPackagesByTarget(target, "Which packages do you wish to clean up?");
-    for (const pkg of packages) {
+    for (const pkg of getSortedPackages(packages)) {
       switch (pkg.type) {
         case "shared":
         case "module": {
@@ -56,42 +55,12 @@ program
       });
     }
 
-    for (const pkg of packages) {
+    for (const pkg of getSortedPackages(packages)) {
       switch (pkg.type) {
         case "replica": {
           npm.dev(pkg.path);
           break;
         }
-        case "module":
-        case "shared": {
-          npm.watch(pkg.path);
-          break;
-        }
-      }
-    }
-  });
-
-program
-  .command("toolkit [target]")
-  .description("start instances for toolkit development")
-  .option("--docker", "spin up docker")
-  .action(async (target: string | undefined, options: any) => {
-    const packages = await getPackagesByTarget(target, "Which packages do you wish to start?");
-
-    if (options.docker && (await docker.hasComposeFile())) {
-      await docker.compose.up();
-      process.on("SIGINT", function () {
-        docker.compose.down();
-      });
-    }
-
-    for (const pkg of packages) {
-      switch (pkg.type) {
-        case "replica": {
-          npm.dev(pkg.path);
-          break;
-        }
-        case "module":
         case "shared": {
           npm.watch(pkg.path);
           break;
@@ -120,53 +89,10 @@ program
   });
 
 program
-  .command("list [type]")
+  .command("list")
   .description("list all cmdo supported packages")
-  .action(async () => {
-    const list = Array.from((await getPackages()).values());
-    const table = new Table({
-      borderStyle: 1,
-      horizontalLine: true,
-      rightPadding: 1,
-      leftPadding: 1
-    });
-
-    table.push(["Type", "Name", "Version", "Published"]);
-
-    const replicas: Package[] = [];
-    const shared: Package[] = [];
-    const modules: Package[] = [];
-
-    for (const pkg of list) {
-      switch (pkg.type) {
-        case "replica": {
-          replicas.push(pkg);
-          break;
-        }
-        case "shared": {
-          shared.push(pkg);
-          break;
-        }
-        case "module": {
-          modules.push(pkg);
-          break;
-        }
-      }
-    }
-
-    for (const pkg of replicas) {
-      table.push([pkg.type, pkg.name, pkg.version]);
-    }
-
-    for (const pkg of shared) {
-      table.push([pkg.type, pkg.name, pkg.version]);
-    }
-
-    for (const pkg of modules) {
-      table.push([pkg.type, pkg.name, pkg.version, await npm.published.version(pkg.name)]);
-    }
-
-    console.log(table.toString());
+  .action(() => {
+    getList().then(console.log);
   });
 
 program.parse(process.argv);
