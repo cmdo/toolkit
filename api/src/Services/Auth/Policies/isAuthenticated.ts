@@ -7,7 +7,7 @@ import { Action as SocketAction } from "cmdo-socket";
  |--------------------------------------------------------------------------------
  */
 
-//#region Policies
+//#region
 
 export const isSocketAuthenticated: SocketAction = async function ({ auth }) {
   if (await auth.isAuthenticated()) {

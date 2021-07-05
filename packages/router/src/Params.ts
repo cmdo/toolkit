@@ -6,16 +6,22 @@ import { ValueStore } from "./ValueStore";
  |--------------------------------------------------------------------------------
  */
 
+//#region
+
 export type Parameter = {
   name: string;
   value?: string;
 };
+
+//#endregion
 
 /*
  |--------------------------------------------------------------------------------
  | Utilities
  |--------------------------------------------------------------------------------
  */
+
+//#region
 
 export function parseParams(path: string): Parameter[] {
   return path.split("/").reduce((list: Parameter[], next: string) => {
@@ -31,10 +37,10 @@ export function parseParams(path: string): Parameter[] {
 
 export function getParams(params: Parameter[], match: any): ValueStore {
   const result: any = {};
-  let index = 1;
-  for (const param of params) {
-    result[param.name] = match[index];
-    index += 1;
-  }
+  params.forEach((param, index) => {
+    result[param.name] = match[index + 1];
+  });
   return new ValueStore(result);
 }
+
+//#endregion

@@ -8,7 +8,7 @@ import { wss } from "../Providers/WebSocketServer";
  |--------------------------------------------------------------------------------
  */
 
-//#region Action
+//#region
 
 const join: Action<{ name: string }> = async function (socket, { name }) {
   socket.join(name);
@@ -33,7 +33,7 @@ const chat: Action<{ room: string; message: string }> = async function (socket, 
  |--------------------------------------------------------------------------------
  */
 
-//#region Register
+//#region
 
 wss.register([Route.on("join", [join]), Route.on("leave", [leave]), Route.on("chat", [chat])]);
 

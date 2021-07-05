@@ -1,7 +1,7 @@
 import EventEmitter from "eventemitter3";
 
 import type { Collection } from "./Database/Collections";
-import type { Action } from "./Model/Model";
+import type { Action } from "./Database/Model";
 
 export const events = {
   database: new (class DatabaseEvent extends EventEmitter<{

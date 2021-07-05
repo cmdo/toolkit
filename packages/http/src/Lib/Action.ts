@@ -6,7 +6,7 @@ import type { IncomingMessage } from "http";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 export type Action = (this: ActionResponse, req: IncomingMessage) => Response;
 
@@ -51,7 +51,7 @@ export type RedirectType = "PERMANENT" | "TEMPORARY";
  |--------------------------------------------------------------------------------
  */
 
-//#region Responses
+//#region
 
 export function redirect(url: string, type: RedirectType = "PERMANENT"): Redirect {
   return {

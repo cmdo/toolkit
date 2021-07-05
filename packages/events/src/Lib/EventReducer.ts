@@ -6,7 +6,7 @@ import type { Event, EventClass } from "./Event";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 type EventHandler<State, T extends Event = any> = (state: State, event: T) => State;
 
@@ -18,7 +18,7 @@ type EventHandler<State, T extends Event = any> = (state: State, event: T) => St
  |--------------------------------------------------------------------------------
  */
 
-//#region Event Reducer
+//#region
 
 export class EventReducer<State = unknown> {
   public actions: Map<string, EventHandler<State>> = new Map();

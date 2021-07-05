@@ -15,7 +15,7 @@ export const auth = new (class Auth {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Accessors
+  //#region
 
   public get isAuthenticated() {
     return this._token !== undefined;
@@ -58,7 +58,7 @@ export const auth = new (class Auth {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Utilities
+  //#region
 
   public async load() {
     const token = localStorage.getItem("token");
@@ -114,7 +114,7 @@ export const auth = new (class Auth {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Resolvers
+  //#region
 
   private async getToken(code: string) {
     const res = await api.get(`/auth/sign?token=${code}`);
@@ -150,7 +150,7 @@ export const auth = new (class Auth {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Errors
+  //#region
 
   private static AuthenticationMissingError = class extends Error {
     public readonly type = "AuthenticationMissingError" as const;

@@ -6,7 +6,7 @@ import { copy } from "../Utils/Copy";
  |--------------------------------------------------------------------------------
  */
 
-//#region Constants
+//#region
 
 const RADIX = 36;
 
@@ -18,7 +18,7 @@ const RADIX = 36;
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 type TimeLike = string | number;
 
@@ -30,7 +30,7 @@ type TimeLike = string | number;
  |--------------------------------------------------------------------------------
  */
 
-//#region Timestamp
+//#region
 
 export class Timestamp {
   public readonly time: number;

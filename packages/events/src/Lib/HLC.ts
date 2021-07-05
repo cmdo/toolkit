@@ -8,7 +8,7 @@ import { Timestamp } from "./Timestamp";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 type Options = {
   time?: typeof getTime;
@@ -29,7 +29,7 @@ type Options = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Hybrid Logical Clock
+//#region
 
 export class HLC {
   public time: typeof getTime;
@@ -54,7 +54,7 @@ export class HLC {
     }
   }
 
-  //#region Public Accessors
+  //#region
 
   public now(): Timestamp {
     return this.update(this.last);
@@ -67,7 +67,7 @@ export class HLC {
 
   //#endregion
 
-  //#region Clock Utilities
+  //#region
 
   private getTimestamp(other: Timestamp): Timestamp {
     const [time, logical] = this.getTimeAndLogicalValue(other);
@@ -88,7 +88,7 @@ export class HLC {
 
   //#endregion
 
-  //#region clock validators
+  //#region
 
   private validOffset(last: Timestamp, time: number): boolean {
     const offset = last.time - time;
@@ -124,7 +124,7 @@ export class HLC {
 
   //#endregion
 
-  //#region clock exceptions
+  //#region
 
   public static ForwardJumpError = class extends Error {
     public readonly type = "ForwardJumpError";

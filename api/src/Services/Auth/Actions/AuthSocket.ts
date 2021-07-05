@@ -8,7 +8,7 @@ import { Auth } from "../../../Providers/Auth";
  |--------------------------------------------------------------------------------
  */
 
-//#region Action
+//#region
 
 export const setSocketAuthentication: Action<{ token: string }> = async function (socket, data) {
   try {

@@ -9,7 +9,7 @@ import type { EventSubscriber } from "./EventSubscriber";
  |--------------------------------------------------------------------------------
  */
 
-//#region Event Publisher
+//#region
 
 export class EventPublisher extends EventEmitter {
   public subscribe<T extends Event>(subscriber: EventSubscriber<T>) {

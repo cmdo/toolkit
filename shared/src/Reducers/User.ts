@@ -10,7 +10,7 @@ import { UserNameSet } from "../Events/UserNameSet";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 type State = {
   id: string;
@@ -26,7 +26,7 @@ type State = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Reducer
+//#region
 
 export const reducer = new EventReducer<State>()
   .set(UserCreated, (state, { data }) => {

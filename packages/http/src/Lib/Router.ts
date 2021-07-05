@@ -61,7 +61,7 @@ export class Router {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Setup
+  //#region
 
   public register(routes: Route[]) {
     for (const route of routes) {
@@ -77,7 +77,7 @@ export class Router {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Resolver
+  //#region
 
   public async resolve(message: IncomingMessage): Promise<HttpSuccess | HttpRedirect | HttpError> {
     if (!message.url || !message.method) {
@@ -130,7 +130,7 @@ export class Router {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Utilities
+  //#region
 
   /**
    * Parse the incoming request body.

@@ -26,7 +26,7 @@ type Tenants = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Synchronization
+//#region
 
 export const sync = new (class EventSync {
   public readonly deviceId: string;
@@ -44,7 +44,7 @@ export const sync = new (class EventSync {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Event Listeners
+  //#region
 
   public on(tenantId: string) {
     socket.join(tenantId);
@@ -64,7 +64,7 @@ export const sync = new (class EventSync {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Utilities
+  //#region
 
   public async refresh(tenantId: string, origin = "api") {
     const events = await this.getQueuedEvents(tenantId);
@@ -108,7 +108,7 @@ export const sync = new (class EventSync {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Tracking IDs
+  //#region
 
   private setTenantOriginID(tenantId: string, origin: string, localId: string) {
     if (!this.tenants[tenantId]) {
@@ -133,7 +133,7 @@ export const sync = new (class EventSync {
  |--------------------------------------------------------------------------------
  */
 
-//#region Event Handlers
+//#region
 
 function onEventAdded({ tenantId }) {
   console.log("Event Added", tenantId);
@@ -148,7 +148,7 @@ function onEventAdded({ tenantId }) {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 function addEvent(tenantId: string, remote: EventDescriptor) {
   const collection = getCollection(tenantId, "events");
@@ -183,7 +183,7 @@ function addEvent(tenantId: string, remote: EventDescriptor) {
  |--------------------------------------------------------------------------------
  */
 
-//#region Sync Storage
+//#region
 
 function createStore(): Store {
   const store = {

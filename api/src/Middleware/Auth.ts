@@ -10,7 +10,7 @@ import { Auth } from "../Providers/Auth";
  |--------------------------------------------------------------------------------
  */
 
-//#region Module
+//#region
 
 declare module "cmdo-socket" {
   interface Client {
@@ -32,7 +32,7 @@ declare module "http" {
  |--------------------------------------------------------------------------------
  */
 
-//#region Middleware
+//#region
 
 export const setWebSocketAuth: Action = async function (socket) {
   if (!socket.auth) {
@@ -63,7 +63,7 @@ export function auth(): Middleware {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 function sendUnauthorizedResponse(res: ServerResponse, error: Error): void {
   res.statusCode = 401;

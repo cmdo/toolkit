@@ -11,7 +11,7 @@ import { parseParams } from "./Params";
  |--------------------------------------------------------------------------------
  */
 
-//#region Route
+//#region
 
 export class Route {
   public readonly method: HttpMethod;
@@ -34,7 +34,7 @@ export class Route {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Factories
+  //#region
 
   public static post(path: string, actions: Action[]): Route {
     return new Route("post", path, actions);
@@ -64,7 +64,7 @@ export class Route {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Utilities
+  //#region
 
   public match(path: string): any {
     return this.regExp.exec(path);

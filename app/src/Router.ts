@@ -12,7 +12,7 @@ export const router = new Router(createBrowserHistory());
  |--------------------------------------------------------------------------------
  */
 
-//#region Routes
+//#region
 
 router.register([new Route("/", [setTitle("Dashboard"), render(Dashboard)]), new Route("/docs", [setTitle("Docs"), render(Docs)])]);
 
@@ -24,7 +24,7 @@ router.register([new Route("/", [setTitle("Dashboard"), render(Dashboard)]), new
  |--------------------------------------------------------------------------------
  */
 
-//#region Actions
+//#region
 
 function setTitle(title: string): Action {
   return async function () {
@@ -47,7 +47,7 @@ function render(component: any): Action {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 export function getTitle(): string {
   return document.title;

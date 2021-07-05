@@ -9,7 +9,7 @@ import { getLogicalId } from "../Utils/Id";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 export type EventClass<T> = {
   new (...args: any[]): T;
@@ -30,7 +30,7 @@ export type EventJSON = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Event
+//#region
 
 export abstract class Event<Attributes = Record<string, any>> {
   public abstract readonly type: string;

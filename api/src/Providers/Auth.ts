@@ -9,7 +9,7 @@ import { config } from "../Config";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 export type Token = {
   auditor: string;
@@ -23,7 +23,7 @@ export type Token = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Auth
+//#region
 
 export class Auth {
   public readonly token?: string;
@@ -60,7 +60,7 @@ export class Auth {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 async function verify(token: string) {
   return new Promise<Token>((resolve, reject) => {

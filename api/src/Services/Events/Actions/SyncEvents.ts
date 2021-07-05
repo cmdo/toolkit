@@ -17,7 +17,7 @@ type Props = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Action
+//#region
 
 export const syncEvents: Action<Props> = async function (socket, { tenantId, streamId, localId, events }) {
   const collection = mongo.collection<EventDescriptor>("events");
@@ -43,7 +43,7 @@ export const syncEvents: Action<Props> = async function (socket, { tenantId, str
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 function getLocalId(descriptors: EventDescriptor[]): string | undefined {
   return descriptors[descriptors.length - 1]?.event.localId;

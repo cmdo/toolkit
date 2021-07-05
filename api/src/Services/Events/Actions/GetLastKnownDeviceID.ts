@@ -14,7 +14,7 @@ type Props = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Action
+//#region
 
 export const getLastKnownDeviceID: Action<Props> = async function (_, { tenantId, deviceId }) {
   return this.respond({
@@ -30,7 +30,7 @@ export const getLastKnownDeviceID: Action<Props> = async function (_, { tenantId
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 async function getEventByDeviceId(tenantId: string, deviceId: string) {
   const descriptors = await mongo

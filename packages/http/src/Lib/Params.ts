@@ -6,7 +6,7 @@ import type { RequestState } from "../Types";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 export type Parameter = {
   name: string;
@@ -21,7 +21,7 @@ export type Parameter = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 export function parseParams(path: string): Parameter[] {
   return path.split("/").reduce((list: Parameter[], next: string) => {
