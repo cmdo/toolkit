@@ -7,5 +7,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "declaration": true
-  }
+  },
+  "references": [
+    {
+      "path": "./packages/access/tsconfig.json"
+    },
+    {
+      "path": "./packages/events/tsconfig.json"
+    }
+  ],
 }
