@@ -1,6 +1,6 @@
 {
   "name": "cmdo-socket",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "Simple WebSocket solution built on ws.",
   "repository": "https://github.com/cmdo/toolkit.git",
   "author": "Christoffer Rødvik <christoffer@kodemon.net>",

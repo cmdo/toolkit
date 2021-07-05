@@ -18,7 +18,7 @@ type Settings = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Server
+//#region
 
 export class Server {
   public routes = new Map<string, Action[]>();
@@ -39,11 +39,11 @@ export class Server {
 
   /*
    |--------------------------------------------------------------------------------
-   | Server
+   | Accessors
    |--------------------------------------------------------------------------------
    */
 
-  //#region Server
+  //#region
 
   public set server(server: WebSocket.Server) {
     this._server = server;
@@ -68,7 +68,7 @@ export class Server {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Setup
+  //#region
 
   public register(routes: Route[]) {
     for (const route of routes) {
@@ -84,7 +84,7 @@ export class Server {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Connect
+  //#region
 
   public connect(portOrServer: number | http.Server): void {
     if (typeof portOrServer === "number") {
@@ -135,7 +135,7 @@ export class Server {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Channels
+  //#region
 
   /**
    * Assign provided socket to the provided room.
@@ -179,7 +179,7 @@ export class Server {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Emitters
+  //#region
 
   /**
    * Broadcast a event to all clients.
@@ -217,7 +217,7 @@ export class Server {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Listeners
+  //#region
 
   private async onMessage(client: Client, { id, event, data }: any): Promise<void> {
     const actions = this.routes.get(event);
@@ -251,7 +251,7 @@ export class Server {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 function getPathname(req: any): string {
   return new URL(req.url, req.protocol + "://" + req.headers.host + "/").pathname;

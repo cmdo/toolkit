@@ -6,7 +6,7 @@ import { Client } from "./Client";
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 export type Action<Data extends Record<string, unknown> = any> = (this: ActionResponse, socket: Client, data: Data) => Response;
 
@@ -41,7 +41,7 @@ type Respond = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Responses
+//#region
 
 export function reject(message: string, data = {}): Rejected {
   return { status: "rejected", message, data };

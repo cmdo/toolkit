@@ -8,7 +8,7 @@ import type { Server } from "./Server";
  |--------------------------------------------------------------------------------
  */
 
-//#region Room
+//#region
 
 export class Room {
   public clients = new Set<WebSocket>();

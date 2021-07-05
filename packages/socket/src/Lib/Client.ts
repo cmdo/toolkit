@@ -1,8 +1,8 @@
 import WebSocket from "ws";
 
-import { uuid } from "../Utils";
 import { Room } from "./Room";
 import type { Server } from "./Server";
+import { uuid } from "./Utils";
 
 /*
  |--------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ import type { Server } from "./Server";
  |--------------------------------------------------------------------------------
  */
 
-//#region Interfaces
+//#region
 
 interface SocketClient {
   id: string;
@@ -24,7 +24,7 @@ interface SocketClient {
  |--------------------------------------------------------------------------------
  */
 
-//#region Client
+//#region
 
 export class Client implements SocketClient {
   public id: string;

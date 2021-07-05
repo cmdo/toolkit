@@ -6,7 +6,7 @@ import type { Action } from "./Action";
  |--------------------------------------------------------------------------------
  */
 
-//#region Route
+//#region
 
 export class Route {
   public readonly event: string;
@@ -23,11 +23,13 @@ export class Route {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Factories
+  //#region
 
   public static on(path: string, actions: Action[]): Route {
     return new Route(path, actions);
   }
+
+  //#endregion
 }
 
 //#endregion
