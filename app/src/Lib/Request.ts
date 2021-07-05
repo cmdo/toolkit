@@ -1,6 +1,5 @@
 import { config } from "../Config";
-import { getToken } from "./Auth";
-import { socket } from "./Socket";
+import { auth } from "./Auth";
 
 type SuccessResponse<Data = any> = {
   status: "success";
@@ -114,15 +113,11 @@ export const api = {
    */
   async send<T = any>(endpoint: string, init: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
-      const token = getToken();
-      return await fetcher(`${config.api.uri}${endpoint}`, {
-        ...init,
-        headers: {
-          ...(init.headers || {}),
-          authorization: token ? `Bearer ${token}` : undefined,
-          socket: socket.id
-        }
-      });
+      init.headers = init.headers || {};
+      if (auth.isAuthenticated) {
+        init.headers["authorization"] = `Bearer ${auth.token}`;
+      }
+      return await fetcher(`${config.api.uri}${endpoint}`, init);
     } catch (err) {
       return {
         status: "error",
@@ -143,5 +138,14 @@ export const api = {
  * @returns Response
  */
 export async function fetcher(input: RequestInfo, init?: RequestInit): Promise<any> {
-  return fetch(input, init).then((r) => r.json());
+  return fetch(input, init).then((r) => {
+    if (r.status === 204) {
+      return {
+        status: "success",
+        code: 204,
+        data: {}
+      };
+    }
+    return r.json();
+  });
 }

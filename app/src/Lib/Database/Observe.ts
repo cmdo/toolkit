@@ -1,5 +1,5 @@
-import { match } from "../Utils/Match";
-import { events } from "./Events";
+import { match } from "../../Utils/Match";
+import { events } from "../Events";
 import type { Action, BaseAttributes, Model } from "./Model";
 
 class ObserverCache extends Map<string, true> {}

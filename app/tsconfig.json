@@ -31,6 +31,11 @@
 				"vite-plugin-pwa/client"
 			]
 		},
+		"references": [
+			{
+				"path": "../packages/router/tsconfig.json"
+			}
+		],
 		"include": ["custom.d.ts", "src/**/*"],
 		"exclude": ["node_modules/*", "__sapper__/*", "static/*"]
 	}

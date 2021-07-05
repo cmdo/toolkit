@@ -3,7 +3,6 @@ import type { Event } from "shared";
 import type { EventDescriptor } from "shared";
 import { events } from "shared";
 
-import { container } from "../Container";
 import { getCollection, saveDatabase } from "../Lib/Database/Utils";
 import { getTenantId } from "../Lib/Tenant";
 import { toArray } from "../Utils/Array";
@@ -17,7 +16,7 @@ import { sync } from "./EventSync";
  |--------------------------------------------------------------------------------
  */
 
-//#region Event Store
+//#region
 
 export const store = new (class EventStore {
   /*
@@ -26,7 +25,7 @@ export const store = new (class EventStore {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Persistors
+  //#region
 
   public async save(events: Event | Event[]) {
     const tenantId = getTenantId();
@@ -48,7 +47,7 @@ export const store = new (class EventStore {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Reducers
+  //#region
 
   public async reduceById<T extends EventReducer>(
     id: string,
@@ -61,10 +60,9 @@ export const store = new (class EventStore {
   public async reduce<T extends EventReducer>(
     filter: LokiQuery<any>,
     reducer: T,
-    initialState = reducer.initialState,
-    db = container.get("Tenant")
+    initialState = reducer.initialState
   ): Promise<ReturnType<T["reduce"]>> {
-    const events = db.getCollection<EventDescriptor>("events").find(filter).sort(orderByOriginId).map(fromEvent);
+    const events = getCollection<EventDescriptor>(getTenantId(), "events").find(filter).sort(orderByOriginId).map(fromEvent);
     if (events.length === 0) {
       throw new Error("Reducer Violation: Query did not yield any events to reduce.");
     }
@@ -82,7 +80,7 @@ export const store = new (class EventStore {
  |--------------------------------------------------------------------------------
  */
 
-//#region Utilities
+//#region
 
 function fromEvent({ event }: EventDescriptor) {
   if (!events[event.type]) {

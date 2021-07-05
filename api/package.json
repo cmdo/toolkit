@@ -21,18 +21,17 @@
   },
   "dependencies": {
     "chalk": "4.1.1",
-    "cmdo-access": "../packages/access",
-    "cmdo-events": "../packages/events",
     "cmdo-http": "../packages/http",
     "cmdo-socket": "../packages/socket",
     "dotenv": "10.0.0",
     "eventemitter3": "4.0.7",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "3.6.9",
-    "shared": "../packages/shared"
+    "shared": "../shared"
   },
   "devDependencies": {
     "@types/eventemitter3": "2.0.2",
-    "@types/jsonwebtoken": "8.5.1",
+    "@types/jsonwebtoken": "^8.5.1",
     "@types/mongodb": "3.6.17",
     "@types/ws": "7.4.4",
     "ts-node-dev": "1.1.6"

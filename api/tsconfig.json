@@ -13,6 +13,14 @@
     "declaration": true,
     "outDir": "dist"
   },
+  "references": [
+    {
+      "path": "../packages/http/tsconfig.json"
+    },
+    {
+      "path": "../packages/socket/tsconfig.json"
+    }
+  ],
   "include": ["custom.d.ts", "src"],
   "exclude": ["**/__tests__"]
 }

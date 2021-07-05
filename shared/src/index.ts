@@ -28,4 +28,5 @@ export { reducer as userReducer } from "./Reducers/User";
  |--------------------------------------------------------------------------------
  */
 
+export * from "./Types/Auth";
 export * from "./Types/Event";

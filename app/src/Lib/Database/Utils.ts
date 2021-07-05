@@ -33,7 +33,7 @@ export function saveDatabase(name: string): void {
 export function getDatabase(name: string): Database {
   const db = database.get(name);
   if (!db) {
-    throw new Error("Database Violation > No active database has been registered.");
+    throw new Error("Database Violation: No active database has been registered.");
   }
   return db;
 }

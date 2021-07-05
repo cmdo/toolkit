@@ -1,9 +1,9 @@
-import { copy } from "../Utils/Copy";
-import type { Collection } from "./Database/Collections";
-import { getCollection } from "./Database/Utils";
-import { events } from "./Events";
+import { copy } from "../../Utils/Copy";
+import { events } from "../Events";
+import { getTenantId } from "../Tenant";
+import type { Collection } from "./Collections";
 import { observe, observeOne } from "./Observe";
-import { getTenantId } from "./Tenant";
+import { getCollection } from "./Utils";
 
 /*
  |--------------------------------------------------------------------------------
@@ -281,15 +281,11 @@ export abstract class Model<A extends BaseAttributes> {
    |--------------------------------------------------------------------------------
    */
 
-  /**
-   * Serialize the model to JSON.
-   *
-   * @returns Model attributes as JSON.
-   */
-  public toJSON(props: any): A {
-    return copy.json<A>({
-      id: this.id,
-      ...props
-    });
+  //#region
+
+  public toJSON(attributes: Omit<A, "id">): A {
+    return copy.json<A>({ id: this.id, ...(attributes as A) });
   }
+
+  //#endregion
 }

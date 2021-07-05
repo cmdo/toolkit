@@ -1,6 +1,6 @@
-import type { Collection } from "../Lib/Database";
-import type { BaseAttributes } from "../Lib/Model";
-import { Model } from "../Lib/Model";
+import type { Collection } from "../Lib/Database/Collections";
+import type { BaseAttributes } from "../Lib/Database/Model";
+import { Model } from "../Lib/Database/Model";
 
 type Attributes = BaseAttributes & {
   name: string;
@@ -30,7 +30,7 @@ export class User extends Model<Attributes> {
     Object.freeze(this);
   }
 
-  public toJSON(): Attributes {
+  public toJSON() {
     return super.toJSON({
       name: this.name,
       email: this.email,

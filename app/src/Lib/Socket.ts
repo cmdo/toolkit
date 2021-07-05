@@ -2,9 +2,11 @@ import EventEmitter from "eventemitter3";
 import { v4 as uuid } from "uuid";
 
 import { config } from "../Config";
+import { auth } from "./Auth";
 
-const RECONNECT_INCREMENT = 1250;
-const MAX_RECONNECT_DELAY = 30000;
+const RECONNECT_INCREMENT = 1250; // 1.25 seconds
+const MAX_RECONNECT_DELAY = 1000 * 60 * 30; // 30 seconds
+const HEARTBEAT_INVERVAL = 1000 * 60 * 30; // 30 seconds
 
 /*
  |--------------------------------------------------------------------------------
@@ -12,7 +14,7 @@ const MAX_RECONNECT_DELAY = 30000;
  |--------------------------------------------------------------------------------
  */
 
-//#region Types
+//#region
 
 type Message<T = void | PromiseLike<void> | undefined> = {
   id: string; // Callback id for post/response events
@@ -20,6 +22,11 @@ type Message<T = void | PromiseLike<void> | undefined> = {
   data: any;
   resolve: (value?: T) => void;
   reject: (reason?: string) => void;
+};
+
+type Debounce = {
+  reconnect: NodeJS.Timeout;
+  heartbeat: NodeJS.Timeout;
 };
 
 //#endregion
@@ -30,19 +37,23 @@ type Message<T = void | PromiseLike<void> | undefined> = {
  |--------------------------------------------------------------------------------
  */
 
-//#region Socket
+//#region
 
 class Socket extends EventEmitter {
-  public isConnected = false;
-
   public messages: Message[] = [];
 
-  private ws?: WebSocket;
-  private debounce!: NodeJS.Timeout;
-  private reconnectDelay = 0;
+  private _ws?: WebSocket;
+  private _rooms = new Set<string>();
+  private _reconnectDelay = 0;
+  private _debounce: Debounce = {
+    reconnect: undefined,
+    heartbeat: undefined
+  };
 
   constructor(public readonly uri: string) {
     super();
+    this.connect = this.connect.bind(this);
+    this.ping = this.ping.bind(this);
     this.onOpen = this.onOpen.bind(this);
     this.onError = this.onError.bind(this);
     this.onMessage = this.onMessage.bind(this);
@@ -51,21 +62,60 @@ class Socket extends EventEmitter {
 
   /*
    |--------------------------------------------------------------------------------
+   | Accessors
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region
+
+  public get isConnected() {
+    return this._ws?.readyState === WebSocket.OPEN;
+  }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
    | Connect
    |--------------------------------------------------------------------------------
    */
 
-  //#region Connect
+  //#region
 
-  public connect(): this {
-    this.ws = new WebSocket(this.uri);
+  public async connect() {
+    return new Promise<void>((resolve) => {
+      this._ws = new WebSocket(this.uri);
 
-    this.ws.onopen = this.onOpen;
-    this.ws.onerror = this.onError;
-    this.ws.onmessage = this.onMessage;
-    this.ws.onclose = this.onClose;
+      this.once("connected", this.onConnect(resolve));
 
+      this._ws.onopen = this.onOpen;
+      this._ws.onerror = this.onError;
+      this._ws.onmessage = this.onMessage;
+      this._ws.onclose = this.onClose;
+    });
+  }
+
+  public disconnect() {
+    this._ws.close(4000, "CLOSED_BY_CLIENT");
     return this;
+  }
+
+  //#endregion
+
+  /*
+   |--------------------------------------------------------------------------------
+   | Heartbeat
+   |--------------------------------------------------------------------------------
+   */
+
+  //#region
+
+  public ping() {
+    this._debounce.heartbeat = setTimeout(() => {
+      if (this.isConnected) {
+        this.post("ping").finally(this.ping);
+      }
+    }, HEARTBEAT_INVERVAL);
   }
 
   //#endregion
@@ -76,20 +126,30 @@ class Socket extends EventEmitter {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Listeners
+  //#region
+
+  public onConnect(resolve: () => void): () => Promise<void> {
+    return async () => {
+      this._reconnectDelay = 0;
+      if (auth.isAuthenticated) {
+        await this.auth(auth.token);
+      }
+      for (const room of this._rooms) {
+        this.join(room);
+      }
+      this.ping();
+      this.process();
+      resolve();
+    };
+  }
 
   public onOpen() {
     console.log("Socket > Connected");
-
-    this.isConnected = true;
-    this.reconnectDelay = 0;
-
     this.emit("connected");
-    this.process();
   }
 
   public onError(ev: Event) {
-    console.log("Socket Violation > ", ev);
+    console.log("Socket Violation:", ev);
   }
 
   public onMessage(msg: MessageEvent<string>) {
@@ -100,21 +160,18 @@ class Socket extends EventEmitter {
   public onClose(ev: CloseEvent) {
     console.log("Socket > Closed");
 
-    if (this.isConnected === true) {
-      this.emit("disconnected");
-    }
-    this.isConnected = false;
+    clearTimeout(this._debounce.heartbeat);
 
     if (ev.code !== 4000) {
-      clearTimeout(this.debounce);
-      this.debounce = setTimeout(
-        () => {
-          this.connect();
-        },
-        this.reconnectDelay < MAX_RECONNECT_DELAY ? (this.reconnectDelay += RECONNECT_INCREMENT) : MAX_RECONNECT_DELAY
+      clearTimeout(this._debounce.reconnect);
+      this._debounce.reconnect = setTimeout(
+        this.connect,
+        this._reconnectDelay < MAX_RECONNECT_DELAY ? (this._reconnectDelay += RECONNECT_INCREMENT) : MAX_RECONNECT_DELAY
       );
       console.log("Socket > Reconnecting");
     }
+
+    this.emit("Socket > Disconnected");
   }
 
   //#endregion
@@ -125,28 +182,29 @@ class Socket extends EventEmitter {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Utilities
+  //#region
 
-  public join(name: string): this {
+  public async auth(token: string) {
+    return this.post("auth", { token });
+  }
+
+  public join(name: string) {
     this.post("join", { name })
       .then(() => {
         console.log(`Socket > Joined ${name}`);
+        this._rooms.add(name);
       })
       .catch(console.log);
     return this;
   }
 
-  public leave(name: string): this {
+  public leave(name: string) {
     this.post("leave", { name })
       .then(() => {
         console.log(`Socket > Left ${name}`);
+        this._rooms.delete(name);
       })
       .catch(console.log);
-    return this;
-  }
-
-  public disconnect(): this {
-    this.ws.close(4000, "CLOSED_BY_CLIENT");
     return this;
   }
 
@@ -158,7 +216,7 @@ class Socket extends EventEmitter {
    |--------------------------------------------------------------------------------
    */
 
-  //#region Message Queue
+  //#region
 
   public async post<T extends Record<string, any>>(event: string, data?: T): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -168,12 +226,12 @@ class Socket extends EventEmitter {
   }
 
   private process(): void {
-    if (!this.ws || !this.isConnected) {
+    if (!this.isConnected) {
       return; // awaiting connection ...
     }
     const message = this.messages.shift();
     if (message) {
-      this.ws.send(
+      this._ws.send(
         JSON.stringify({
           id: message.id,
           event: message.event,
@@ -208,3 +266,20 @@ class Socket extends EventEmitter {
  */
 
 export const socket = new Socket(config.socket);
+
+/*
+ |--------------------------------------------------------------------------------
+ | Debug
+ |--------------------------------------------------------------------------------
+ |
+ | TODO: Remove before release, or put behind developer flag ... 
+ |
+ */
+
+declare global {
+  interface Window {
+    socket: Socket;
+  }
+}
+
+window.socket = socket;
