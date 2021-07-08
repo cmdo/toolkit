@@ -9,5 +9,5 @@ import { clock } from "./Clock";
  */
 export function getLogicalId(): string {
   const ts = clock.now().toJSON();
-  return `${ts.time}-${ts.logical}`;
+  return `${ts.time}-${String(ts.logical).padStart(5, "0")}`;
 }

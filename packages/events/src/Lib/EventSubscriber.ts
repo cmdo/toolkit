@@ -8,7 +8,7 @@ import { Event, EventClass } from "./Event";
 
 //#region
 
-type EventHandler<T> = (event: T) => Promise<void> | void;
+type EventHandler<T> = (event: T) => Promise<void>;
 
 //#endregion
 
@@ -20,7 +20,7 @@ type EventHandler<T> = (event: T) => Promise<void> | void;
 
 //#region
 
-export class EventSubscriber<T extends Event> {
+export class EventSubscriber<T extends Event = any> {
   public readonly type: string;
   public readonly handle: EventHandler<T>;
 
